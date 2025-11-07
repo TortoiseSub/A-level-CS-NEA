@@ -1,4 +1,6 @@
 ////Varaiables
+
+console.log('client side active')
 let gamestate = `main`
 let playingSpriteGroup
 
@@ -38,13 +40,13 @@ let wallJumpSlideUnlocked = true
 function preload(){
 	//Spritesheets
 	//Player sheet
-	knightSpriteSheet = loadImage(`Assets/Sprite Sheets/player/Knight Sprite Sheet.png`)
+	knightSpriteSheet = loadImage(`Assets/Sprite Sheets/Player/Knight Sprite Sheet.png`)
 
 	//HUD Images 
 	HUDCasingImg = loadImage(`Assets/HUD/Vessels/HUD Casing.png`)
 	shieldImg = loadImage(`Assets/HUD/Health/Shield.png`)
 	brokenShieldImg = loadImage(`Assets/HUD/Health/Broken Shield.png`)
-	shieldCasingImg = loadImage(`Assets/HUD/Health/Shield Casing.png`)
+	shieldCasingImg = loadImage(`Assets/HUD/Health/Shield casing.png`)
 }
 
 //Setup
