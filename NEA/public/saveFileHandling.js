@@ -1,4 +1,4 @@
-var socket = io.connect
+var socket = io.connect()
 io.on(`recieveReadData`, (data) => { receiveReadData(data) })
 io.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
@@ -7,7 +7,7 @@ let writtenFileData
 
 
 callReadData(`Savefiles/saveFileBlank.txt`)
-console.log(readFileData)
+console.log('data : ' + readFileData)
 
 function callWriteData(filepath, data){
     socket.emit(`callWriteData`, (filepath,data))
@@ -15,10 +15,12 @@ function callWriteData(filepath, data){
 
 function callReadData(filepath){
     socket.emit(`callReadData`, (filepath))
+    console.log('Attempted emit')
 }
 
 function receiveReadData(data){
     readFileData = data
+    console.log('recieved read data')
 }
 
 function receiveWriteData(data){
