@@ -1,12 +1,12 @@
 var socket = io.connect()
-io.on(`recieveReadData`, (data) => { receiveReadData(data) })
-io.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
+socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
+socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 let readFileData
 let writtenFileData
 
 
-callReadData(`Savefiles/saveFileBlank.txt`)
+readFileData = callReadData(`Savefiles/saveFileBlank.txt`)
 console.log('data : ' + readFileData)
 
 function callWriteData(filepath, data){
@@ -19,8 +19,8 @@ function callReadData(filepath){
 }
 
 function receiveReadData(data){
-    readFileData = data
-    console.log('recieved read data')
+    console.log('read data : ', data)
+    return data
 }
 
 function receiveWriteData(data){
