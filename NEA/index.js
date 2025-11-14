@@ -23,7 +23,7 @@ io.on(`connection`, connected)
 function connected(socket) {
     console.log(socket.id + " has connected");
 
-    socket.on(`callWriteData`, (filepath, data) => {writeData(filepath,data)})
+    socket.on(`callWriteData`, (transferData) => {writeData(transferData)})
     socket.on(`callReadData`, (filepath) => {readData(filepath)})
 }
 
@@ -31,19 +31,14 @@ function connected(socket) {
 
 
 //File Handling
-function writeData(filepath,data){
-    try {
-        const jsonData = JSON.stringify({
-            name: 'John Doe',
-            email: 'john@example.com',
-        })
-        fs.writeFile(filepath, 'utf8', (io.emit(`receiveWriteData` (data))))
-        console.log('User data saved successfully!')
-    } 
-    catch (error) {
-        console.error('Failed to save user data:', error.message)
-        throw error
-    }
+function writeData(transferData){
+    fs.writeFile(transferData.filepath, transferData.data, 'utf8', (err) => {
+
+        console.log('errors : ' , err)
+        io.emit('receiveWriteData', (err))
+
+    })
+    console.log('User data saved successfully!')
 }
 
 function readData(filepath){
@@ -51,7 +46,11 @@ function readData(filepath){
     fs.readFile(filepath, 'utf8',(err, data) => {
 
         console.log('errors : ' , err,'\nread data : ', data)
-        io.emit(`receiveReadData`, (data))
+        let transferData = {
+            err : err,
+            readData: data
+        }
+        io.emit(`receiveReadData`, (transferData))
 
     })
 }
