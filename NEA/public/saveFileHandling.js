@@ -25,3 +25,33 @@ function receiveReadData(transferData){
 function receiveWriteData(err){
     console.log('errors : ' + err)
 }
+
+//Encryption
+function getSavingData(){
+    saveData = {
+        jumpHacked : jumphacked,
+        doubleJumpedUnlocked : doubleJumpedUnlocked,
+        dashUnlocked : dashUnlocked,
+        wallJumpSlideUnlocked : wallJumpSlideUnlocked,
+    }
+    return saveData
+}
+function generateSalt(){
+
+}
+function generateHMAC(data,key){
+
+}
+function cipherData(data,key){
+//Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
+
+
+
+
+
+
+
+
+
+
+}
