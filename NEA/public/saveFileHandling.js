@@ -2,6 +2,8 @@ var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
+console.log(hash256(`10100010`,`01101000`))
+
 callWriteData(`Savefiles/saveFileBlank.txt`,`Tommy + Scott + 4x tin of mackeral`)
 
 function callWriteData(filepath, data){
@@ -80,6 +82,21 @@ function cipherData(data,initialState){
 function encryptData(data, initialState){
 
 }
+
+async function hash256(parameter1,parameter2){
+    let hashInput = parameter1 + parameter2
+
+
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder().encode(hashInput);                    
+
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+    console.log(hashBuffer)
+
+}
+
 
 function maskXOR(value1, value2){
     let XORValue = []
