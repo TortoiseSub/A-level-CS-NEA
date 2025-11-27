@@ -2,9 +2,9 @@ var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
-console.log(hash256(`10100010`,`01101000`))
+let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
 
-callWriteData(`Savefiles/saveFileBlank.txt`,`Tommy + Scott + 4x tin of mackeral`)
+console.log(cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState))
 
 function callWriteData(filepath, data){
     let transferData ={
@@ -29,8 +29,6 @@ function receiveWriteData(err){
 }
 
 //Encryption
-
-let initialState = 
 
 function getSavingData(){
     saveData = {
@@ -64,19 +62,26 @@ function cipherData(data,initialState){
 
     //1.
     for(i = 0; i < data.length; i++){
-        plainTextCodes = [].push(data.charCodeAt(i))
+        characterCode = data.charCodeAt(i).toString(2)
+        if(characterCode.length != 8){
+            placeHolderCount = 8 - characterCode.length
+            for(j = 0; j < placeHolderCount; j ++){
+                characterCode = `0` + characterCode
+            }
+        }
+        plainTextCodes.push(characterCode)
     }
-
     for(i = 0; i < plainTextCodes.length; i++){
         //2. 
-        key = currentState.slice(i*8, i*8 +8)
+        console.log(currentState)
+        key = currentState.slice((i*8), (i*8 +8))
         //3. 
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
-        currentState = hash(encryptedTextCodes[i],key)
+        currentState = hash256(encryptedTextCodes[i],key)
         
     }
-    
+    return encryptedTextCodes
 }
 
 function encryptData(data, initialState){
@@ -85,16 +90,28 @@ function encryptData(data, initialState){
 
 async function hash256(parameter1,parameter2){
     let hashInput = parameter1 + parameter2
-
+    let hashOutput = ``
 
     // encode as UTF-8
     const msgBuffer = new TextEncoder().encode(hashInput);                    
-
     // hash the message
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
 
-    console.log(hashBuffer)
-
+    //Convert to 256 string
+    for(i = 0; i < hashArray.length; i++){
+        hashArray[i] = hashArray[i].toString(2)
+        if(hashArray[i].length != 8){
+            placeHolderCount = 8 - hashArray[i].length
+            for(j = 0; j < placeHolderCount; j ++){
+                hashArray[i] = `0` + hashArray[i]
+            }
+        }
+    }
+    for(i = 0; i < hashArray.length;i++){
+        hashOutput = hashOutput + hashArray[i]
+    }
+    return hashOutput
 }
 
 
