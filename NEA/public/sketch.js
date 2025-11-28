@@ -277,6 +277,8 @@ function checkGameplayInputs(){
 		//Jumping
 		if(kb.presses((getKeyBinding(`jump`,0))) || kb.presses(getKeyBinding(`jump`,1))){//Jumping
 			//Seperated statement so that double jump can be implemented later 
+			breakTEST()
+
 			if(jumpHacked == true){
 				player.vel.y = -6 //Jump velocity
 				animationRequestQueue.push([`jump`,1]) //Add jump animation to queue
@@ -444,6 +446,3 @@ function min(array){
 	}
 	return min
 }
-
-
-

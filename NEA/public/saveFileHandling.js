@@ -4,9 +4,10 @@ socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
 
-// let data = cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState)
-// console.log(data)
-
+async function breakTEST(){
+    let data = await cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState)
+    console.log(data)
+}
 function callWriteData(filepath, data){
     let transferData ={
         filepath : filepath,
@@ -62,7 +63,7 @@ async function cipherData(data,initialState){
     ////7. Repeat for all bits
 
     //1.
-    for(i = 0; i < data.length; i++){
+    for(let i = 0; i < data.length; i++){
         characterCode = data.charCodeAt(i).toString(2)
         if(characterCode.length != 8){
             placeHolderCount = 8 - characterCode.length
@@ -72,14 +73,25 @@ async function cipherData(data,initialState){
         }
         plainTextCodes.push(characterCode)
     }
-    for(i = 0; i < plainTextCodes.length; i++){
+    console.log(plainTextCodes)
+    console.log(plainTextCodes.length)
+    for(let i = 0; i < plainTextCodes.length;i++){
+        console.log(currentState)
+        console.log(encryptedTextCodes)
         //2. 
-        key = currentState.slice((i*8), (i*8 +8))
+        console.log(i)
+        let bounds =[i*8,i*8+8]
+        if(bounds[1] > 256){
+            bounds[0] -= 256
+            bounds[1] -= 256
+        }
+        console.log(bounds)
+        key = currentState.slice(bounds[0], bounds[1])
+        console.log(`key : `, key)
         //3. 
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
-        currentState = await hash256(encryptedTextCodes[i],key)
-        
+        currentState = await hash256(encryptedTextCodes[i],key)   
     }
     return encryptedTextCodes
 }
@@ -99,7 +111,7 @@ async function hash256(parameter1,parameter2){
     const hashArray = Array.from(new Uint8Array(hashBuffer));
 
     //Convert to 256 string
-    for(i = 0; i < hashArray.length; i++){
+    for(let i = 0; i < hashArray.length; i++){
         hashArray[i] = hashArray[i].toString(2)
         if(hashArray[i].length != 8){
             placeHolderCount = 8 - hashArray[i].length
@@ -108,7 +120,7 @@ async function hash256(parameter1,parameter2){
             }
         }
     }
-    for(i = 0; i < hashArray.length;i++){
+    for(let i = 0; i < hashArray.length;i++){
         hashOutput = hashOutput + hashArray[i]
     }
     return hashOutput
@@ -118,12 +130,12 @@ async function hash256(parameter1,parameter2){
 function maskXOR(value1, value2){
     let XORValue = []
     if(value1.length == value2.length){
-        for(i = 0; i < value1.length ; i++){
+        for(let i = 0; i < value1.length ; i++){
             let iterationValue = -1
             if(value1[i] == value2[i]){
                 iterationValue = 0
             }
-            if(value1[i] == value2[i]){
+            else if(value1[i] == value2[i]){
                 iterationValue = 1
             }
             XORValue.push(iterationValue)
@@ -132,6 +144,7 @@ function maskXOR(value1, value2){
     }
     else{
         console.log('Values are not the same length')
+        console.log(value1, ` : `, value2)
     }
     return XORValue
 }
