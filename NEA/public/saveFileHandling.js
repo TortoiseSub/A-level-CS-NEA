@@ -4,7 +4,8 @@ socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
 
-console.log(cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState))
+// let data = cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState)
+// console.log(data)
 
 function callWriteData(filepath, data){
     let transferData ={
@@ -45,7 +46,7 @@ function generateSalt(){
 function generateHMAC(data,initialState){
 
 }
-function cipherData(data,initialState){
+async function cipherData(data,initialState){
     //Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
     let plainTextCodes = []
     let encryptedTextCodes = []
@@ -73,18 +74,17 @@ function cipherData(data,initialState){
     }
     for(i = 0; i < plainTextCodes.length; i++){
         //2. 
-        console.log(currentState)
         key = currentState.slice((i*8), (i*8 +8))
         //3. 
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
-        currentState = hash256(encryptedTextCodes[i],key)
+        currentState = await hash256(encryptedTextCodes[i],key)
         
     }
     return encryptedTextCodes
 }
 
-function encryptData(data, initialState){
+function encryptData(data, initialState){ 
 
 }
 
