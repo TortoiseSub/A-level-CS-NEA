@@ -3,11 +3,6 @@ socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
-
-async function breakTEST(){
-    let data = await cipherData(`Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`, initialState)
-    console.log(data)
-}
 function callWriteData(filepath, data){
     let transferData ={
         filepath : filepath,
@@ -51,6 +46,7 @@ async function cipherData(data,initialState){
     //Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
     let plainTextCodes = []
     let encryptedTextCodes = []
+    let encryptedData = ``
     let currentState = initialState
     let key
     //1. Convert data to bit codes for each character
@@ -73,31 +69,67 @@ async function cipherData(data,initialState){
         }
         plainTextCodes.push(characterCode)
     }
-    console.log(plainTextCodes)
-    console.log(plainTextCodes.length)
     for(let i = 0; i < plainTextCodes.length;i++){
-        console.log(currentState)
-        console.log(encryptedTextCodes)
         //2. 
-        console.log(i)
         let bounds =[i*8,i*8+8]
         if(bounds[1] > 256){
             bounds[0] -= 256
             bounds[1] -= 256
         }
-        console.log(bounds)
         key = currentState.slice(bounds[0], bounds[1])
-        console.log(`key : `, key)
         //3. 
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
-        currentState = await hash256(encryptedTextCodes[i],key)   
+        currentState = await hash256(encryptedTextCodes[i],currentState)   
     }
-    return encryptedTextCodes
+    for(let i = 0; i < encryptedTextCodes.length ; i++){
+        encryptedData += encryptedTextCodes[i]
+    }
+    return encryptedData
+}
+async function deCipherData(data,initialState){
+    //Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
+    let plainTextCodes = []
+    let plainText =``
+    let encryptedTextCodes = []
+    let currentState = initialState
+    let key
+    //1. Split data to 8 bit codes for each character
+    ////Repeat start
+    //2. Generate first key from state
+    //3. DEcode bit code using ciphertext bit code XOR key 
+    //4. Hash Encrypted bitcode and key
+    //5. Save hash as new state
+    //6. Generate second key from state second position
+    ////7. Repeat for all bits
+
+    //1.
+    for(let i = 0; i < data.length/8; i++){
+        encryptedTextCodes.push(data.slice(8*i,8*i+8))
+    }
+    for(let i = 0; i < encryptedTextCodes.length;i++){
+        //2. 
+        let bounds =[i*8,i*8+8]
+        if(bounds[1] > 256){
+            bounds[0] -= 256
+            bounds[1] -= 256
+        }
+        key = currentState.slice(bounds[0], bounds[1])
+        //3. 
+        plainTextCodes.push(maskXOR(encryptedTextCodes[i],key))
+        //4. 5.
+        currentState = await hash256(encryptedTextCodes[i],currentState)   
+    }
+    for(let i = 0; i < plainTextCodes.length; i++){
+        let characterCode = parseInt(plainTextCodes[i],2)
+        let character = String.fromCharCode(characterCode) 
+        plainText += character
+    }
+    return plainText
 }
 
 function encryptData(data, initialState){ 
-
+//Generate Salt and merge
 }
 
 async function hash256(parameter1,parameter2){
@@ -128,19 +160,18 @@ async function hash256(parameter1,parameter2){
 
 
 function maskXOR(value1, value2){
-    let XORValue = []
-    if(value1.length == value2.length){
+    let XORValue = ``
+    if(value1.length  == value2.length){
         for(let i = 0; i < value1.length ; i++){
             let iterationValue = -1
             if(value1[i] == value2[i]){
                 iterationValue = 0
             }
-            else if(value1[i] == value2[i]){
+            else if(value1[i] != value2[i]){
                 iterationValue = 1
             }
-            XORValue.push(iterationValue)
+            XORValue += iterationValue.toString()
         }
-        XORValue = XORValue.toString()
     }
     else{
         console.log('Values are not the same length')
