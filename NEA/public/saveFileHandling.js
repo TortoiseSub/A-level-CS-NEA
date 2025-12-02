@@ -2,6 +2,11 @@ var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
+function breakTEST(){
+    data = generateSalt()
+    console.log(data)
+}
+
 let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
 function callWriteData(filepath, data){
     let transferData ={
@@ -37,7 +42,21 @@ function getSavingData(){
     return saveData
 }
 function generateSalt(){
-
+    let salt = ``
+    let quantity1 = 0
+    let quantity0 = 1
+    let value 
+    for(let i = 0 ; i < 64;i ++){
+        value = Math.random()
+        value = Math.round(value)
+        if(value == 0){
+            quantity0 += 1
+        }  
+        else if(value == 1){
+            quantity1 += 1
+        }
+        salt += value
+    }
 }
 function generateHMAC(data,initialState){
 
