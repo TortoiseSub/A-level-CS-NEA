@@ -2,12 +2,12 @@ var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
-function breakTEST(){
-    data = generateSalt()
+async function breakTEST(){
+    data = await encryptData(`CheeseBorgur!, Form SCott yoyur wleckiinmbd blash blahs blah 129482793756775674 I hate harry carter-scott render`)
     console.log(data)
 }
 
-let initialState = `1010000001000011111011111011100010010100100000110100100001001010111011001111100010110011100100011111110011111001101010011000011110010110101101000010110011110000000001001010100001101111010110011110100011101001101100101011001101000101001101110001011101010010`
+
 function callWriteData(filepath, data){
     let transferData ={
         filepath : filepath,
@@ -44,7 +44,7 @@ function getSavingData(){
 function generateSalt(){
     let salt = ``
     let quantity1 = 0
-    let quantity0 = 1
+    let quantity0 = 0
     let value 
     for(let i = 0 ; i < 64;i ++){
         value = Math.random()
@@ -57,10 +57,27 @@ function generateSalt(){
         }
         salt += value
     }
+    return salt
 }
-function generateHMAC(data,initialState){
+async function generateHMAC(data,key){
+    let HMACInput = data + key
+    let MAC = ``
 
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder().encode(HMACInput);                    
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    //Convert to single string of hex numbers
+    for(let i = 0; i < hashArray.length;i++){
+        MAC = MAC + hashArray[i].toString(16)
+    }
+    
+    return MAC
 }
+
+
 async function cipherData(data,initialState){
     //Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
     let plainTextCodes = []
@@ -97,6 +114,9 @@ async function cipherData(data,initialState){
         }
         key = currentState.slice(bounds[0], bounds[1])
         //3. 
+        console.log(currentState)
+        console.log(key)
+        console.log(plainTextCodes[i])
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
         currentState = await hash256(encryptedTextCodes[i],currentState)   
@@ -147,8 +167,24 @@ async function deCipherData(data,initialState){
     return plainText
 }
 
-function encryptData(data, initialState){ 
-//Generate Salt and merge
+async function encryptData(data){ 
+    //Generate Salt and merge with initial State
+    let knownKey = `10100000010000111110111110111000100101001000001101001000010010101110110011111000101100111001000111111100111110011010100110000111`
+    let salt = generateSalt()
+    let initialState = salt+knownKey
+
+    //Cipher Data
+    let plainText = data
+    let cipheredData = await cipherData(plainText, initialState)
+
+    //Bind salt to data
+    let encryptedData = cipheredData + ` ` + salt
+    
+    //Bind HMAC to data
+    let MAC = await generateHMAC(cipheredData, knownKey)
+    let sealedData = encryptedData + ` ` + MAC
+
+    return sealedData
 }
 
 async function hash256(parameter1,parameter2){
