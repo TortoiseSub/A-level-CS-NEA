@@ -2,8 +2,9 @@ var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
+
 async function breakTEST(){
-    data = await encryptData(`CheeseBorgur!, Form SCott yoyur wleckiinmbd blash blahs blah 129482793756775674 I hate harry carter-scott render`)
+    data = await callReadData(1)
     console.log(data)
 }
 
@@ -16,29 +17,75 @@ function callWriteData(filepath, data){
     socket.emit(`callWriteData`, (transferData))
 }
 
-function callReadData(filepath){
-    socket.emit(`callReadData`, (filepath))
-    console.log('Attempted emit')
-}
-
-function receiveReadData(transferData){
-    console.log('errors : ' + transferData.err +'\nread data : ', transferData.readData)
-    return data
+async function callReadData(filepath){
+    data = await socket.emit(`callReadData`, (filepath), (transferData) => {
+        console.log('errors : ' + transferData.err +'\nread data : ', transferData.readData)
+        return transferData.readData
+    })
 }
 
 function receiveWriteData(err){
     console.log('errors : ' + err)
+
 }
 
 //Encryption
+async function saveData(saveFile){
+    let data = getSavingData()
+    let writeData = await encryptData(data)
+    let filepath
+
+    if(saveFile == 1){
+        filepath = `Savefiles/saveFileOne.txt`
+    }
+    else if(saveFile == 2){
+        filepath = `Savefiles/saveFileTwo.txt`
+    }
+    else if(saveFile == 3){
+        filepath = `Savefiles/saveFileThree.txt`
+    }
+    else if(saveFile == 4){
+        filepath = `Savefiles/saveFileFour.txt`
+    }
+    callWriteData(filepath, writeData)
+}
+async function readSaveData(saveFile){
+    let filepath
+    if(saveFile == 1){
+        filepath = `Savefiles/saveFileOne.txt`
+    }
+    else if(saveFile == 2){
+        filepath = `Savefiles/saveFileTwo.txt`
+    }
+    else if(saveFile == 3){
+        filepath = `Savefiles/saveFileThree.txt`
+    }
+    else if(saveFile == 4){
+        filepath = `Savefiles/saveFileFour.txt`
+    }
+
+
+    callReadData(filepath)
+    console.log(returnFileData)
+}
+
+async function readSaveFile(saveFile){
+    saveFile
+}
 
 function getSavingData(){
     saveData = {
-        jumpHacked : jumphacked,
-        doubleJumpedUnlocked : doubleJumpedUnlocked,
+        jumpHacked : jumpHacked,
+        doubleJumpUnlocked : doubleJumpUnlocked,
         dashUnlocked : dashUnlocked,
         wallJumpSlideUnlocked : wallJumpSlideUnlocked,
+        maxHealth : maxHealth,
+        controls : controls,
+        //cheats : cheats,
+        //currentSaveLocation : currentSaveLocation,
+        //steelSoul : steelSoul,
     }
+    saveData = JSON.stringify(saveData)
     return saveData
 }
 function generateSalt(){
@@ -109,14 +156,14 @@ async function cipherData(data,initialState){
         //2. 
         let bounds =[i*8,i*8+8]
         if(bounds[1] > 256){
-            bounds[0] -= 256
-            bounds[1] -= 256
+            bounds[0] = ((bounds[0]) % 256)
+            bounds[1] = ((bounds[1]) % 256)
+            if(bounds[1] == 0){
+                bounds[1] = 256
+            }
         }
         key = currentState.slice(bounds[0], bounds[1])
         //3. 
-        console.log(currentState)
-        console.log(key)
-        console.log(plainTextCodes[i])
         encryptedTextCodes.push(maskXOR(plainTextCodes[i],key))
         //4. 5.
         currentState = await hash256(encryptedTextCodes[i],currentState)   
@@ -150,8 +197,11 @@ async function deCipherData(data,initialState){
         //2. 
         let bounds =[i*8,i*8+8]
         if(bounds[1] > 256){
-            bounds[0] -= 256
-            bounds[1] -= 256
+            bounds[0] = ((bounds[0]) % 256)
+            bounds[1] = ((bounds[1]) % 256)
+            if(bounds[1] == 0){
+                bounds[1] = 256
+            }
         }
         key = currentState.slice(bounds[0], bounds[1])
         //3. 
@@ -166,13 +216,30 @@ async function deCipherData(data,initialState){
     }
     return plainText
 }
+async function decryptData(data){
+    let knownKey = `101000000100001111101111101110001001010010000011010010000100101011101100111110001011001110010001111111001111100110101001100001111110100100001000100000101101101110010000111011010111010010111011`
+
+    let dataPoints = data.split(` `)
+    let listedMAC = dataPoints[2]
+    let encryptedData = dataPoints[0] + ` ` + dataPoints[1]
+    let MAC = await generateHMAC(encryptedData, knownKey)
+    if(listedMAC == MAC){
+        console.log(`Data verified`)
+        let initialState = dataPoints[1] + knownKey
+        let plainText = deCipherData(dataPoints[0],initialState)
+        return plainText
+    }
+    else{
+        console.log(`Corruption/tampering detected`)
+        return null
+    }
+}
 
 async function encryptData(data){ 
     //Generate Salt and merge with initial State
     let knownKey = `101000000100001111101111101110001001010010000011010010000100101011101100111110001011001110010001111111001111100110101001100001111110100100001000100000101101101110010000111011010111010010111011`
     let salt = generateSalt()
     let initialState = salt+knownKey
-    console.log(initialState.length)
 
     //Cipher Data
     let plainText = data
@@ -182,7 +249,7 @@ async function encryptData(data){
     let encryptedData = cipheredData + ` ` + salt
     
     //Bind HMAC to data
-    let MAC = await generateHMAC(cipheredData, knownKey)
+    let MAC = await generateHMAC(encryptedData, knownKey)
     let sealedData = encryptedData + ` ` + MAC
 
     return sealedData
