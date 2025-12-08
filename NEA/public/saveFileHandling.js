@@ -4,7 +4,7 @@ socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 
 async function breakTEST(){
-    data = await callReadData(1)
+    data = await callReadData(`Savefiles/saveFileOne.txt`)
     console.log(`data : ` , data)
 }
 
@@ -37,6 +37,21 @@ function receiveWriteData(err){
 }
 
 //Encryption
+async function updateContols(){
+    let saveData1 = await readSaveData(1)
+    saveData1.controls = controls
+    saveData(saveData1)
+    let saveData2 = await readSaveData(2)
+    saveData2.controls = controls
+    saveData(saveData2)
+    let saveData3 = await readSaveData(3)
+    saveData3.controls = controls
+    saveData(saveData3)
+    let saveData4 = await readSaveData(4)
+    saveData4.controls = controls
+    saveData(saveData4)
+}
+
 async function saveData(saveFile){
     let data = getSavingData()
     let writeData = await encryptData(data)
@@ -72,16 +87,34 @@ async function readSaveData(saveFile){
     }
 
 
-    callReadData(filepath)
-    console.log(returnFileData)
+    let encryptedData = await callReadData(filepath)
+    let data = decryptData(encryptedData)
+    saveData = JSON.parse(data)
+    return saveData
 }
 
 async function readSaveFile(saveFile){
     saveFile
 }
 
+function implementSavingData(saveData){
+    jumpHacked = saveData.jumpHacked
+    doubleJumpUnlocked = saveData.doubleJumpUnlocked
+    dashUnlocked = saveData.dashUnlocked
+    wallJumpSlideUnlocked = saveData.wallJumpSlideUnlocked
+    maxHealth = saveData.maxHealth
+    controls = saveData.controls
+    //cheats = saveData.cheats
+    //currentSaveLocation = saveData.currentSaveLocation
+    //steelSoul = saveData.steelSoul
+
+
+
+
+}
+
 function getSavingData(){
-    saveData = {
+    let saveData = {
         jumpHacked : jumpHacked,
         doubleJumpUnlocked : doubleJumpUnlocked,
         dashUnlocked : dashUnlocked,

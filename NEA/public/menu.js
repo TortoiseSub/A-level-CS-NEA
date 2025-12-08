@@ -167,6 +167,8 @@ function activateButton(index,menu){
                             controlsMenuButtons[i].key2 = controls[i][1][1]
                         }
                     }
+                    // Save the new control scheme to all save files
+                    updateContols()
                 }
             }
             else if(action == `close menu`){
@@ -229,7 +231,7 @@ let rebindListener = null
 function startRebind(controlIndex){
     // Initialize tempControls when starting rebinding if needed
     if(!tempControls){
-        tempControls = JSON.parse(JSON.stringify(controls))
+        tempControls = controls
     }
 
     // If a rebind is already active, cancel it first
