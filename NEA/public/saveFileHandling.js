@@ -5,7 +5,7 @@ socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
 async function breakTEST(){
     data = await callReadData(1)
-    console.log(data)
+    console.log(`data : ` , data)
 }
 
 
@@ -18,9 +18,16 @@ function callWriteData(filepath, data){
 }
 
 async function callReadData(filepath){
-    data = await socket.emit(`callReadData`, (filepath), (transferData) => {
-        console.log('errors : ' + transferData.err +'\nread data : ', transferData.readData)
-        return transferData.readData
+    return new Promise((resolve,reject) => {
+        socket.emit(`callReadData`, (filepath), (transferData) => {
+            console.log('errors : ' + transferData.err +'\nread data : ', transferData.readData)
+            if(transferData.err){
+                reject(new Error(transferData.err))
+            }
+            else{
+                resolve(transferData.readData)
+            }
+        })
     })
 }
 

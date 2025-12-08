@@ -22,16 +22,17 @@ function connected(socket) {
     console.log(socket.id + " has connected");
 
     socket.on(`callWriteData`, (transferData) => {writeData(transferData)})
+
     socket.on(`callReadData`, (filepath,callback) => {
         console.log(`reading data`)
         fs.readFile(filepath, 'utf8',(err, data) => {
 
-        console.log('errors : ' , err,'\nread data : ', data)
-        let transferData = {
-            err : err,
-            readData: data
-        }
-        callback(transferData)
+            console.log('errors : ' , err,'\nread data : ', data)
+            let transferData = {
+                err : err,
+                readData: data
+            }
+            callback(transferData)
 
         })
 
