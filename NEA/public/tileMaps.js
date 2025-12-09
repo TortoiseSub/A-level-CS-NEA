@@ -47,6 +47,23 @@ function loadTileData() {
 	damageTile = new ground.Group()
 	damageTile.colour ='red'
 	damageTile.tile = `c`
+
+	background = new tilesGroup.Group()
+	background.friction = 0
+	background.bounciness = 0
+
+	interactiveTile = new background.Group()
+	interactiveTile.physics = `KIN`
+	interactiveTile.w = tileSize
+	interactiveTile.h = tileSize	
+	interactiveTile.colour = 'black'
+
+	benchTile = new interactiveTile.Group()
+	benchTile.colour = 'brown'
+	benchTile.tile = `d`
+	benchTile.ID = ``
+	benchTile.activate = benchActivate(tile)
+
 }
 let tileMapsData = [
 	[[
@@ -78,14 +95,14 @@ let tileMapsData = [
 		"...................bb.............................b........................................................................bbbbb",
 		"..bbb..............bb......................................................................................................bbbbb",
 		"..bbbb.............b...............................................................................................bb......bbbbb",
-		".bbbbb...........bbb..........................................................................................bb.bbbbbbbbbbbbbbb",
+		".bbbbb...........bbb................................................................................d.........bb.bbbbbbbbbbbbbbb",
 		".bbb.............bbb..................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"..................bb..............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbb",
 		"...................................................bb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...........bbbbb",
 		"...................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbb................bb",
 		"....................................................bbbbbbbbbbbbbbbbbbbbbb......................................................",
-		"....................................................bbbbbbbbbbbbbbbb............................................................",
+		"..................d.................................bbbbbbbbbbbbbbbb............................................................",
 		"bbbbbbcccccccbbbbbbbbbbbbbbbb........................bbbbbbbbbbbbb..............................................................",
 		"bbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbb.....................bbbbbbbbbbb................................................................",
 		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........................................................................................bbb...",
@@ -107,7 +124,7 @@ let tileMapsData = [
 		"bbb..............................................bbbb..........................................................................b",
 		"bbb..............................................bbbb.................bbbbbbbbbbbbbbbbbbbbbbbbb................................b",
 		"bbb..............................................bbbb.............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.............................b",
-		"bbb............cccc..............................bbbb.........bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb....bbbbbb...........bb",
+		"bbb............cccc..........d...................bbbb.........bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb....bbbbbb...........bb",
 		"bbb........bbbbccccccbbbbbbbbbb...................bbb........bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...........bb",
 		"bbbbbbbbbbbbbbbbbccccbbbbbbbbbbbbbbbb.............bbb......bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...........bb",
 		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..............bb.....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............bb",
@@ -124,11 +141,11 @@ let tileMapsData = [
 		"bbbb...........................................................................................................................b",
 		"bbbb...........................................................................................................................b",
 		"bbbb...........................................................................................................................b",
-		"bbbb.........................................................................................................bbbbbbbbbbbbbb....b",
+		"bbbb...............................................................................................d.........bbbbbbbbbbbbbb....b",
 		"bbbb.............bbbbbbbb.....................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"bbbb.............bbbbbbbb.....................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"bbb...........................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-		"bbb...........................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		"bbb............................................................d..............................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"bbb.......................................................bbbbbbbbbbbb..............bb........bbbbb..........................bbb",
 		"bbb..............................................bbbbbbbbbbbbbbbbbbbbb..............bbb.......bbbbb..........................bbb",
 		"bbb..............................................bbbbbbbbbbbbbbbbbbbbb.............bbbb.......bbbbb..........................bbb",
@@ -169,7 +186,7 @@ let tileMapsData = [
 		"....bbb...........bbb...................................bbbb....................................................................",
 		"....bbb...........bbb...........................................................................................................",
 		"..................bbb.......................................................................................bbb.................",
-		"..................bbb...............cccccc...................................ccccccc........................bbb.................",
+		"..................bbb.....d.........cccccc...................................ccccccc........................bbb.................",
 		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
@@ -266,5 +283,28 @@ function loadCurrentChunks(){
 function updateLastSafeTile(){
 	bottomSensor.overlapping(regularTile, (b, sprite) =>{
 		lastSafeTile = sprite
+	})
+}
+
+function benchActivate(tile){
+	player.heal(`Max`)
+	lastSaveTile = tile.ID
+}
+
+function indexInteractiveTiles(){
+	savePointIndex = []
+	let savePointCount = 0
+	//let tileCount = 0
+	interactiveTile.forEach((tile) => {
+		if (tile.tile === `d`) {
+			tile.ID = `savePoint` + stringify(savePointCount)
+			savePointIndex.push([tile.ID, tile.x, tile.y])
+			savePointCount += 1 
+		}
+		//else if (tile.tile === ``) {
+			//tile.ID = `` + stringify(tileCount )
+			//tileIndex.push([tile.ID, tile.x, tile.y])
+			//tileCount += 1
+		//}
 	})
 }

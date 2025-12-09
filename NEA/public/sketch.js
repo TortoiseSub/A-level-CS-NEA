@@ -1,4 +1,5 @@
 ////Varaiables
+let steelSoul = false //If true, player has steel soul mode enabled, causing permanent death
 
 console.log('client side active')
 let gamestate = `main`
@@ -10,8 +11,9 @@ let heightLocked = false
 let lockedHeight = 0
 
 let movementLocked = false
-let jumpHacked = false //If true, player can jump even if not on ground
 
+let jumpHacked = false //If true, player can jump even if not on ground
+let cheats = false //If true, save file is permanently marked as cheats having been used
 //Pause variables
 let pauseStart
 let pauseEnd
@@ -307,6 +309,13 @@ function checkGameplayInputs(){
 			}
 		}
 		//left and right movement
+		if(player.overlapping(interactiveTile)){
+			if(kb.pressing(getKeyBinding(`interact`,0)) || kb.pressing(getKeyBinding(`interact`,1))){
+				player.overlapping(interactiveTile, (player, sprite) =>{
+					sprite.activate(sprite)
+				})
+			}
+		}
 		if((kb.pressing(getKeyBinding(`left`,0)) || kb.pressing(getKeyBinding(`left`,1)) || kb.pressing(getKeyBinding(`right`,0)) || kb.pressing(getKeyBinding(`right`,1)))){//Makes the priority of the left and right movement being pressed equal
 			// if both left and right pressed, do nothing
 			if((kb.pressing(getKeyBinding(`left`,0)) || kb.pressing(getKeyBinding(`left`,1))) && (kb.pressing(getKeyBinding(`right`,0)) || kb.pressing(getKeyBinding(`right`,1)))){

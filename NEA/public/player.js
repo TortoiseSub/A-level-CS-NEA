@@ -234,6 +234,19 @@ function loseHealth(quantity){
 	}
 }
 
+function heal(quantity){
+	if(quantity == `Max`){
+		currentHealth = maxHealth
+	}
+	else if(currentHealth < maxHealth){
+		currentHealth += quantity
+		if(currentHealth > maxHealth){
+			currentHealth = maxHealth
+		}
+
+	}
+}
+
 function immunityTimeout(){
 	if(paused){
 		scheduledUnpauseFunctions.push([immunityTimeout,(world.realTime - pauseStart)])
@@ -255,6 +268,7 @@ function setupControls(){
 		[`dash`,[`c`,``]],
 		[`pause`,[`ESCAPE`,``]],
 		[`inventory`,[`i`,``]],
+		[`interact`,[`arrowUp`,``]],
 		//[`QuickMap`,[`TAB`,``]],
 		//[`lookUp`,[`UPARROW`,``]],
 		//[`lookDown`,[`DOWNARROW`,``]],
