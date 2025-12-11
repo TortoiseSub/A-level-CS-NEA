@@ -48,11 +48,11 @@ function loadTileData() {
 	damageTile.colour ='red'
 	damageTile.tile = `c`
 
-	background = new tilesGroup.Group()
-	background.friction = 0
-	background.bounciness = 0
+	backgroundTiles = new tilesGroup.Group()
+	backgroundTiles.friction = 0
+	backgroundTiles.bounciness = 0
 
-	interactiveTile = new background.Group()
+	interactiveTile = new backgroundTiles.Group()
 	interactiveTile.physics = `KIN`
 	interactiveTile.w = tileSize
 	interactiveTile.h = tileSize	
@@ -62,7 +62,7 @@ function loadTileData() {
 	benchTile.colour = 'brown'
 	benchTile.tile = `d`
 	benchTile.ID = ``
-	benchTile.activate = benchActivate(tile)
+	benchTile.activate = benchActivate
 
 }
 let tileMapsData = [
@@ -287,7 +287,7 @@ function updateLastSafeTile(){
 }
 
 function benchActivate(tile){
-	player.heal(`Max`)
+	heal(`Max`)
 	lastSaveTile = tile.ID
 }
 

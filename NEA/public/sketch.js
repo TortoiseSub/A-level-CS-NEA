@@ -1,5 +1,7 @@
 ////Varaiables
 let steelSoul = false //If true, player has steel soul mode enabled, causing permanent death
+let currentSaveLocation = 0 //The current save location index the player is at
+let saveFile
 
 console.log('client side active')
 let gamestate = `main`
@@ -22,20 +24,20 @@ let paused
 let scheduledUnpauseFunctions = []
 
 //Double jump ability
-let doubleJumpUnlocked = true
+let doubleJumpUnlocked = false
 let doubleJumpCharged
 let doubleJumpCold = true
 let doubleJumpCooldownTime = 300 //Time in milliseconds before double jump can be used again
 
 //Dash ability
-let dashUnlocked = true
+let dashUnlocked = false
 let dashCharged
 let dashCold = true
 let dashCooldownTime = 600 //Time in milliseconds before dash can be used again
 let dashDuration = 300
 
 //Wall slide ability
-let wallJumpSlideUnlocked = true
+let wallJumpSlideUnlocked = false
 
 
 //Preload
@@ -83,6 +85,8 @@ function setup(){
 		//Player Setup
 		loadPlayerModel()
 		loadPlayerAnis()
+
+		loadSaveData(saveFile)
 		teleport(player,0,25)
 	}
 	else if(gamestate == `paused`){
@@ -279,7 +283,6 @@ function checkGameplayInputs(){
 		//Jumping
 		if(kb.presses((getKeyBinding(`jump`,0))) || kb.presses(getKeyBinding(`jump`,1))){//Jumping
 			//Seperated statement so that double jump can be implemented later 
-			breakTEST()
 
 			if(jumpHacked == true){
 				player.vel.y = -6 //Jump velocity

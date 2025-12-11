@@ -88,6 +88,7 @@ function activateButton(index,menu){
         }
     }
     else if(menu == `saveFile`){
+        console.log(index)
         openSaveFile(index)
     }
     else if(menu == `pause`){
@@ -623,13 +624,15 @@ function closeDeathMenu(){
     console.log(`removed all`)
 }   
 
-function openSaveFileMenu(){
+function openSaveFileMenu(index){
     lastGamestate = gamestate
     closeMainMenu()
     gamestate = `saveFile`
+    saveFile = index + 1
     setup()
 }
 function closeSaveFileMenu(){
+    saveData(saveFile)
     saveFileMenu.remove()
     console.log(`removed all`)
 }
