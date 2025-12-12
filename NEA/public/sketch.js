@@ -54,7 +54,7 @@ function preload(){
 }
 
 //Setup
-function setup(){
+async function setup(){
 	//Canvas Setup
 	new Canvas(windowWidth, windowHeight)
 	setupControls()
@@ -79,15 +79,19 @@ function setup(){
 		loadTileData()
 		//loadNewMap(0)
 		SplitMap(0)
+		indexInteractiveTiles()
 		//Camera Setup
 		loadCameraData()
 
 		//Player Setup
 		loadPlayerModel()
 		loadPlayerAnis()
+		console.log(`opening saveFile : ` , saveFile)
+		await loadSaveData(saveFile)
 
-		loadSaveData(saveFile)
-		teleport(player,0,25)
+		playingSpriteGroup.draw()
+		//Teleport player to last save location
+		teleport(player, savePointIndex[currentSaveLocation][1], savePointIndex[currentSaveLocation][2] - (tileSize/2))
 	}
 	else if(gamestate == `paused`){
 		pauseMenuSetup()

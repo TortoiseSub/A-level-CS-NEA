@@ -29,6 +29,50 @@ function cleanupGameState() {
 }
 
 function menuInputs(navigationParameters){
+    // Popup handling: if a new-save or delete-confirm popup is open, handle its buttons first
+    if(newSavePopup){
+        for(let i = 0; i < newSavePopup.length; i++){
+            let s = newSavePopup[i]
+            if(s.action && mouse.presses() && s.mouse.hovering()){
+                if(s.action == `regular`){
+                    // create new save and start game
+                    let slot = pendingSaveIndex
+                    createNewSaveFromBlank(slot, false).then(() => {
+                        saveFile = slot
+                        lastGamestate = gamestate
+                        gamestate = `playing`
+                        closeSaveFileMenu()
+                        setup()
+                    })
+                }
+                else if(s.action == `steelsoul`){
+                    let slot = pendingSaveIndex
+                    createNewSaveFromBlank(slot, true).then(() => {
+                        saveFile = slot
+                        lastGamestate = gamestate
+                        gamestate = `playing`
+                        closeSaveFileMenu()
+                        setup()
+                    })
+                }
+                return
+            }
+        }
+    }
+    if(deleteConfirmPopup){
+        for(let i = 0; i < deleteConfirmPopup.length; i++){
+            let s = deleteConfirmPopup[i]
+            if(s.action && mouse.presses() && s.mouse.hovering()){
+                if(s.action == `confirmDelete`){
+                    overwriteWithBlank(pendingSaveIndex)
+                }
+                else if(s.action == `cancelDelete`){
+                    hideDeleteConfirmPopup()
+                }
+                return
+            }
+        }
+    }
     if(kb.presses(`down`)){
         navigationParameters[1] += 1
         //Loop if above max range
@@ -88,8 +132,31 @@ function activateButton(index,menu){
         }
     }
     else if(menu == `saveFile`){
-        console.log(index)
-        openSaveFile(index)
+        // saveFileMenuButtons arranged as [slot1_main, slot1_delete, slot2_main, slot2_delete, ...]
+        if(index % 2 == 0){
+            // main button pressed
+            let slot = (index / 2) + 1
+            // if slot is blank, prompt for new save creation
+            if(saveFileIsBlank[slot-1]){
+                showNewSavePopup(slot)
+            }
+            else{
+                // Open existing save
+                lastGamestate = gamestate
+                gamestate = `playing`
+                saveFile = slot
+                closeSaveFileMenu()
+                setup()
+            }
+        }
+        else{
+            // delete button pressed
+            let slot = ((index - 1) / 2) + 1
+            let delSprite = saveFileMenuButtons[index]
+            if(delSprite && delSprite.enabled){
+                showDeleteConfirmPopup(slot)
+            }
+        }
     }
     else if(menu == `pause`){
         if(index == 0){
@@ -99,7 +166,7 @@ function activateButton(index,menu){
             openControlsMenu()
         }
         else if(index == 2){
-            //saveGame()
+            saveData(saveFile)
             allSprites.remove()
             openMainMenu()
         }
@@ -361,35 +428,169 @@ let saveFileButton4
 let saveFileSelectedButton = 0
 let saveFileSelectedButtonRange = [0,3]
 
+// Track save-file state and popups
+let saveFileIsBlank = [true, true, true, true]
+let saveFileChecked = false
+let newSavePopup = null
+let deleteConfirmPopup = null
+let pendingSaveIndex = null
+
+async function checkSaveFilesStatus(){
+    // Populate saveFileIsBlank by attempting to read each save; treat failures as blank
+    for(let i = 1; i <= 4; i++){
+        try{
+            let data = await readSaveData(i)
+            // If readSaveData returns a valid object, assume not blank
+            if(data && typeof data === 'object'){
+                saveFileIsBlank[i-1] = false
+            }
+            else{
+                saveFileIsBlank[i-1] = true
+            }
+        }
+        catch(e){
+            saveFileIsBlank[i-1] = true
+        }
+    }
+    saveFileChecked = true
+    // Update delete button visuals if menu exists
+    if(saveFileMenuButtons){
+        for(let i = 0; i < 4; i++){
+            let delSprite = saveFileMenuButtons[i*2+1]
+            if(delSprite){
+                if(saveFileIsBlank[i]){
+                    delSprite.color = `#333333`
+                    delSprite.defaultColor = `#333333`
+                    delSprite.enabled = false
+                }
+                else{
+                    delSprite.color = `#5b5b5b`
+                    delSprite.defaultColor = `#5b5b5b`
+                    delSprite.enabled = true
+                }
+            }
+        }
+    }
+}
+
+function showNewSavePopup(slot){
+    // create a simple popup group asking Regular or Steel Soul
+    newSavePopup = new Group()
+    let bg = new newSavePopup.Sprite(windowWidth/2, windowHeight/2, 400, 200, `rectangle`)
+    bg.color = `#222222`
+    bg.defaultColor = `#222222`
+    let btn1 = new newSavePopup.Sprite(windowWidth/2 - 80, windowHeight/2 + 40, 140, 50, `rectangle`)
+    btn1.color = `#5b5b5b`
+    btn1.action = `regular`
+    let btn2 = new newSavePopup.Sprite(windowWidth/2 + 80, windowHeight/2 + 40, 140, 50, `rectangle`)
+    btn2.color = `#5b5b5b`
+    btn2.action = `steelsoul`
+    pendingSaveIndex = slot
+}
+function hideNewSavePopup(){
+    if(newSavePopup){ newSavePopup.remove(); newSavePopup = null }
+    pendingSaveIndex = null
+}
+
+function showDeleteConfirmPopup(slot){
+    deleteConfirmPopup = new Group()
+    let bg = new deleteConfirmPopup.Sprite(windowWidth/2, windowHeight/2, 420, 180, `rectangle`)
+    bg.color = `#222222`
+    let btnYes = new deleteConfirmPopup.Sprite(windowWidth/2 - 80, windowHeight/2 + 40, 120, 50, `rectangle`)
+    btnYes.color = `#5b5b5b`
+    btnYes.action = `confirmDelete`
+    let btnNo = new deleteConfirmPopup.Sprite(windowWidth/2 + 80, windowHeight/2 + 40, 120, 50, `rectangle`)
+    btnNo.color = `#5b5b5b`
+    btnNo.action = `cancelDelete`
+    pendingSaveIndex = slot
+}
+function hideDeleteConfirmPopup(){
+    if(deleteConfirmPopup){ deleteConfirmPopup.remove(); deleteConfirmPopup = null }
+    pendingSaveIndex = null
+}
+
+async function createNewSaveFromBlank(slot, steelSoulChoice){
+    // Read blank file, set steelSoul, and write to target slot
+    try{
+        let encryptedBlank = await callReadData(`Savefiles/saveFileBlank.txt`)
+        let plain = await decryptData(encryptedBlank)
+        let obj = JSON.parse(plain)
+        obj.steelSoul = !!steelSoulChoice
+        let newEncrypted = await encryptData(JSON.stringify(obj))
+        let filepath = `Savefiles/saveFileOne.txt`
+        if(slot == 2) filepath = `Savefiles/saveFileTwo.txt`
+        else if(slot == 3) filepath = `Savefiles/saveFileThree.txt`
+        else if(slot == 4) filepath = `Savefiles/saveFileFour.txt`
+        callWriteData(filepath, newEncrypted)
+        saveFileIsBlank[slot-1] = false
+        hideNewSavePopup()
+        // update UI delete button if present
+        if(saveFileMenuButtons && saveFileMenuButtons[(slot-1)*2+1]){
+            let d = saveFileMenuButtons[(slot-1)*2+1]
+            d.color = `#5b5b5b`
+            d.defaultColor = `#5b5b5b`
+            d.enabled = true
+        }
+    }
+    catch(e){
+        console.log(`Failed to create new save: `, e)
+    }
+}
+
+async function overwriteWithBlank(slot){
+    try{
+        let encryptedBlank = await callReadData(`Savefiles/saveFileBlank.txt`)
+        let filepath = `Savefiles/saveFileOne.txt`
+        if(slot == 2) filepath = `Savefiles/saveFileTwo.txt`
+        else if(slot == 3) filepath = `Savefiles/saveFileThree.txt`
+        else if(slot == 4) filepath = `Savefiles/saveFileFour.txt`
+        callWriteData(filepath, encryptedBlank)
+        saveFileIsBlank[slot-1] = true
+        hideDeleteConfirmPopup()
+        // update delete button visual
+        if(saveFileMenuButtons && saveFileMenuButtons[(slot-1)*2+1]){
+            let d = saveFileMenuButtons[(slot-1)*2+1]
+            d.color = `#333333`
+            d.defaultColor = `#333333`
+            d.enabled = false
+        }
+    }
+    catch(e){ console.log(`Failed to overwrite: `, e) }
+}
 function saveFileMenuSetup(){
 
     saveFileMenu = new Group()
     saveFileMenuButtons = new saveFileMenu.Group()
 
+    saveFileMenuBackground = new saveFileMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
+    saveFileMenuBackground.color = `#444444`
 
- 	saveFileMenuBackground = new saveFileMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
-	saveFileMenuBackground.color = `#444444`
-
-	saveFileButton1 = new saveFileMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 250,500,100,`rectangle`)		
-    saveFileButton1.color = `#5b5b5b`
-	saveFileButton1.defaultColor = `#5b5b5b`
-
-	saveFileButton2 = new saveFileMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 100, 500,100,`rectangle`)
-	saveFileButton2.color = `#5b5b5b`
-	saveFileButton2.defaultColor = `#5b5b5b`
-    	
-    saveFileButton3 = new saveFileMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 50, 500,100,`rectangle`)
-	saveFileButton3.color = `#5b5b5b`
-	saveFileButton3.defaultColor = `#5b5b5b`
-
-    saveFileButton4 = new saveFileMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 200, 500,100,`rectangle`)
-	saveFileButton4.color = `#5b5b5b`
-	saveFileButton4.defaultColor = `#5b5b5b`
+    // For each save slot create a main button + a small delete button
+    let baseY = windowHeight/2 - 250
+    for(let s = 0; s < 4; s++){
+        let y = baseY + s*150
+        let main = new saveFileMenuButtons.Sprite(windowWidth/2, y, 500, 100, `rectangle`)
+        main.color = `#5b5b5b`
+        main.defaultColor = `#5b5b5b`
+        main.tag = s+1
+        main.action = `open`
+        // small delete button to the right
+        let del = new saveFileMenuButtons.Sprite(windowWidth/2 + 280, y, 50, 50, `rectangle`)
+        // default to disabled look until status check runs
+        del.color = saveFileIsBlank[s] ? `#333333` : `#5b5b5b`
+        del.defaultColor = del.color
+        del.tag = s+1
+        del.action = `delete`
+        del.enabled = !saveFileIsBlank[s]
+    }
 
     saveFileSelectedButton = 0
-    saveFileMenuButtons[0].color = `#999999`
+    if(saveFileMenuButtons.length > 0) saveFileMenuButtons[0].color = `#999999`
     saveFileSelectedButtonRange = [0,saveFileMenuButtons.length-1]
     saveFileMenuNavigationParameters = [`saveFile`,saveFileSelectedButton,saveFileSelectedButtonRange,saveFileMenuButtons]
+
+    // Kick off async status check to enable delete buttons appropriately
+    checkSaveFilesStatus()
 }
 
 //Pause Menu 
@@ -631,8 +832,8 @@ function openSaveFileMenu(index){
     saveFile = index + 1
     setup()
 }
-function closeSaveFileMenu(){
-    saveData(saveFile)
+async function closeSaveFileMenu(){
+    await saveData(saveFile)
     saveFileMenu.remove()
     console.log(`removed all`)
 }
@@ -673,6 +874,7 @@ function closeInventory(){
 function openSaveFile(index){
     lastGamestate = gamestate
     gamestate = `playing`
+    saveFile = index + 1
     closeSaveFileMenu()
     setup()
 }

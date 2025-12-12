@@ -288,23 +288,27 @@ function updateLastSafeTile(){
 
 function benchActivate(tile){
 	heal(`Max`)
-	lastSaveTile = tile.ID
+	currentSaveLocation = tile.ID
 }
 
 function indexInteractiveTiles(){
 	savePointIndex = []
 	let savePointCount = 0
 	//let tileCount = 0
-	interactiveTile.forEach((tile) => {
-		if (tile.tile === `d`) {
-			tile.ID = `savePoint` + stringify(savePointCount)
-			savePointIndex.push([tile.ID, tile.x, tile.y])
-			savePointCount += 1 
+	for(let i = 0; i < tileMapsData[0][0].length; i++){
+		for(let j = 0; j < tileMapsData[0][0][i].length; j++){
+			if (tileMapsData[0][0][i][j]=== `d`) {
+				let ID = (savePointCount)
+				let x = j * tileSize + - (tileSize/2)
+				let y = i * tileSize + - (tileSize/2)
+				savePointIndex.push([ID, x, y])
+				savePointCount += 1 
+			}
+			//else if (tile.tile === ``) {
+				//tile.ID = `` + stringify(tileCount )
+				//tileIndex.push([tile.ID, tile.x, tile.y])
+				//tileCount += 1
+			//}
 		}
-		//else if (tile.tile === ``) {
-			//tile.ID = `` + stringify(tileCount )
-			//tileIndex.push([tile.ID, tile.x, tile.y])
-			//tileCount += 1
-		//}
-	})
+	}
 }

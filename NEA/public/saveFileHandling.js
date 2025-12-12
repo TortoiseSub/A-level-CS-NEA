@@ -14,7 +14,7 @@ function callWriteData(filepath, data){
 async function callReadData(filepath){
     return new Promise((resolve,reject) => {
         socket.emit(`callReadData`, (filepath), (transferData) => {
-            console.log('errors : ' + transferData.err +'\nread data : ', transferData.readData)
+            console.log('read errors : ' + transferData.err)
             if(transferData.err){
                 reject(new Error(transferData.err))
             }
@@ -26,7 +26,7 @@ async function callReadData(filepath){
 }
 
 function receiveWriteData(err){
-    console.log('errors : ' + err)
+    console.log('write errors : ' + err)
 
 }
 
@@ -80,10 +80,10 @@ async function readSaveData(saveFile){
         filepath = `Savefiles/saveFileFour.txt`
     }
 
-
+    console.log('Reading from : ' + filepath)
     let encryptedData = await callReadData(filepath)
-    let data = decryptData(encryptedData)
-    saveData = JSON.parse(data)
+    let data = await decryptData(encryptedData)
+    let saveData = JSON.parse(data)
     return saveData
 }
 
