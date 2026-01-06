@@ -51,7 +51,10 @@ async function saveData(saveFile){
     let writeData = await encryptData(data)
     let filepath
 
-    if(saveFile == 1){
+    if(saveFile == `blank`){
+        filepath = `Savefiles/blankSaveFile.txt`
+    }
+    else if(saveFile == 1){
         filepath = `Savefiles/saveFileOne.txt`
     }
     else if(saveFile == 2){
@@ -100,8 +103,8 @@ function implementSavingData(saveData){
     maxHealth = saveData.maxHealth
     controls = saveData.controls
     //cheats = saveData.cheats
-    //currentSaveLocation = saveData.currentSaveLocation
-    //steelSoul = saveData.steelSoul
+    currentSaveLocation = saveData.currentSaveLocation
+    fileType = saveData.fileType
 
 
 
@@ -118,7 +121,7 @@ function getSavingData(){
         controls : controls,
         cheats : cheats,
         currentSaveLocation : currentSaveLocation,
-        steelSoul : steelSoul,
+        fileType : fileType,
     }
     saveData = JSON.stringify(saveData)
     return saveData

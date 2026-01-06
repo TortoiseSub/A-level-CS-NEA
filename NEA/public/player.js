@@ -229,8 +229,17 @@ function loseHealth(quantity){
 		setTimeout(immunityTimeout, IFrameDuration)
 	}
 	if(currentHealth <= 0){
-		gameState = `gameOver`
-		openDeathMenu()
+		if (fileType == `steelsoul`){
+			fileType = `steelsoulbroken`
+			clearInterval(autoSave)
+			saveData(saveFile)
+            allSprites.remove()
+            openMainMenu()
+		}
+		if(fileType == `normal`){
+			gameState = `gameOver`
+			openDeathMenu()
+		}
 	}
 }
 

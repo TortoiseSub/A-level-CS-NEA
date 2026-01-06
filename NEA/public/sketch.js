@@ -1,5 +1,5 @@
 ////Varaiables
-let steelSoul = false //If true, player has steel soul mode enabled, causing permanent death
+let fileType = `empty` //If true, player has steel soul mode enabled, causing permanent death
 let currentSaveLocation = 0 //The current save location index the player is at
 let saveFile
 
@@ -51,6 +51,47 @@ function preload(){
 	shieldImg = loadImage(`Assets/HUD/Health/Shield.png`)
 	brokenShieldImg = loadImage(`Assets/HUD/Health/Broken Shield.png`)
 	shieldCasingImg = loadImage(`Assets/HUD/Health/Shield casing.png`)
+	
+	////Menu Images
+	//Main Menu images
+	playButtonImage = loadImage(`Assets/Menus/MainMenu/play.png`)
+	playButtonSelectedImage = loadImage(`Assets/Menus/MainMenu/play selected.png`)
+	controlsButtonImage = loadImage(`Assets/Menus/MainMenu/controls.png`)
+	controlsButtonSelectedImage = loadImage(`Assets/Menus/MainMenu/controls selected.png`)
+
+	// Save file menu images
+	saveFile1SelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 1 selected.png`)
+	saveFile1SteelSoulBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 1 steelSoul-broken-selected.png`)
+	saveFile1SteelSoulBrokenImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 1 steelSoul-broken.png`)
+	saveFile1SteelSoulSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 1 steelSoul-selected.png`)
+	saveFile1SteelSoulImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 1 steelSoul.png`)
+	saveFile1Image = loadImage(`Assets/Menus/SaveFileMenu/Save File 1.png`)
+
+	saveFile2SelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 2 selected.png`)
+	saveFile2SteelSoulBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 2 steelSoul-broken-selected.png`)
+	saveFile2SteelSoulBrokenImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 2 steelSoul-broken.png`)
+	saveFile2SteelSoulSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 2 steelSoul-selected.png`)
+	saveFile2SteelSoulImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 2 steelSoul.png`)
+	saveFile2Image = loadImage(`Assets/Menus/SaveFileMenu/Save File 2.png`)
+
+	saveFile3SelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 selected.png`)
+	saveFile3SteelSouBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSou-broken-selected.png`)
+	saveFile3SteelSoulBrokenImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul-broken.png`)
+	saveFile3SteelSoulSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul-selected.png`)
+	saveFile3SteelSoulImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul.png`)
+	saveFile3Image = loadImage(`Assets/Menus/SaveFileMenu/Save File 3.png`)
+
+	saveFile4SelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 4 selected.png`)
+	saveFile4SteelSoulBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 4 steelSoul-broken-selected.png`)
+	saveFile4SteelSoulBrokenImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 4 steelSoul-broken.png`)
+	saveFile4SteelSoulSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 4 steelSoul-selected.png`)
+	saveFile4SteelSoulImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 4 steelSoul.png`)
+	saveFile4Image = loadImage(`Assets/Menus/SaveFileMenu/Save File 4.png`)
+
+	saveFileBlankSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File blank selected.png`)
+	saveFileBlankImage = loadImage(`Assets/Menus/SaveFileMenu/Save File blank.png`)
+
+	
 }
 
 //Setup
@@ -88,10 +129,27 @@ async function setup(){
 		loadPlayerAnis()
 		console.log(`opening saveFile : ` , saveFile)
 		await loadSaveData(saveFile)
+		let saveFileData = await readSaveData(saveFile)
+		if(saveFileData.fileType == `empty`){
+			let saveFileEmpty = true
+			while(saveFileEmpty){
+				let saveFileChoice = prompt("Creating new save file. Choose file type: 'normal' or 'steelsoul'").toLowerCase()
+				if(saveFileChoice == `normal` || saveFileChoice == `steelsoul`){
+					fileType = saveFileChoice
+					saveFileEmpty = false
+				}
+				else{
+					alert("Invalid input. Please enter 'normal' or 'steelsoul'.")
+				}
+			}
+		}
 
 		playingSpriteGroup.draw()
 		//Teleport player to last save location
 		teleport(player, savePointIndex[currentSaveLocation][1], savePointIndex[currentSaveLocation][2] - (tileSize/2))
+	    autoSave = setInterval(() => {
+			saveData(saveFile)
+		}, 600000); //Auto-save every 10 minutes (600,000 milliseconds)
 	}
 	else if(gamestate == `paused`){
 		pauseMenuSetup()
@@ -252,6 +310,7 @@ function checkGameplayInputs(){
 
 
 	if(kb.presses(getKeyBinding(`dash`,0)) || kb.presses(getKeyBinding(`dash`,1))){
+		//Dash
 		if(dashUnlocked && dashCharged && dashCold){//If dash unlocked, charged and not on cooldown
 			movementLocked = true
 			dashCold = false
