@@ -17,9 +17,9 @@ function loadNewMap(mapNum) {
     if(tilemap)	{tilemap.removeAll()}
    
 	tilemap = new Tiles(
-		tileMapsData[mapNum][0],
-		tileMapsData[mapNum][1],
-		tileMapsData[mapNum][2],
+		tileMapsData[mapNum][0], //Tilemap array
+		tileMapsData[mapNum][1], //xPosition
+		tileMapsData[mapNum][2], //yPosition
 		tileSize,
 		tileSize
 	)
@@ -281,6 +281,7 @@ function loadCurrentChunks(){
 }
 
 function updateLastSafeTile(){
+	//find last safe tile player is on for when they hit a damage tile
 	bottomSensor.overlapping(regularTile, (b, sprite) =>{
 		lastSafeTile = sprite
 	})
@@ -292,18 +293,23 @@ function benchActivate(tile){
 }
 
 function indexInteractiveTiles(){
+	//Index all interactive tiles in the map
 	savePointIndex = []
+
 	let savePointCount = 0
-	//let tileCount = 0
+	//e.g. let tileCount = 0
+
 	for(let i = 0; i < tileMapsData[0][0].length; i++){
 		for(let j = 0; j < tileMapsData[0][0][i].length; j++){
 			if (tileMapsData[0][0][i][j]=== `d`) {
+				//index save files
 				let ID = (savePointCount)
 				let x = j * tileSize + - (tileSize/2)
 				let y = i * tileSize + - (tileSize/2)
 				savePointIndex.push([ID, x, y])
 				savePointCount += 1 
 			}
+			//e.g. for other interactive tiles
 			//else if (tile.tile === ``) {
 				//tile.ID = `` + stringify(tileCount )
 				//tileIndex.push([tile.ID, tile.x, tile.y])

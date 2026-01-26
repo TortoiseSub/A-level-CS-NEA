@@ -20,7 +20,7 @@ let saveFile2SteelSoulImage = null
 let saveFile2Image = null
 
 let saveFile3SelectedImage = null
-let saveFile3SteelSouBrokenSelectedImage = null
+let saveFile3SteelSoulBrokenSelectedImage = null
 let saveFile3SteelSoulBrokenImage = null
 let saveFile3SteelSoulSelectedImage = null
 let saveFile3SteelSoulImage = null
@@ -67,8 +67,12 @@ function cleanupGameState() {
 }
 
 function menuInputs(navigationParameters){
+    //navigationParameters = [menuName, currentSelectedButton, buttonRange[min,max], buttonsGroup]
+    //Navigation parameters holds all the menu navigation data
+
 
     for(i = 0 ; i <= navigationParameters[2][1] ; i++){
+        //NavigationParameters[2][1] is the max index of buttons in the menu
         if (navigationParameters[3][i].defaultImage != null) {
             navigationParameters[3][i].image = navigationParameters[3][i].defaultImage
             navigationParameters[3][i].image.scale = 0.625
@@ -961,6 +965,7 @@ function deathMenuSetup() {
     deathMenuButtons[0].color = '#999999'
     deathSelectedButtonRange = [0,1]
     deathMenuNavigationParameters = ['death', deathSelectedButton, deathSelectedButtonRange, deathMenuButtons]
+    
 }
 
 function drawDeathMenuLabels() {

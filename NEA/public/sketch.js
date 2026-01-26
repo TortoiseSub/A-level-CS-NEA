@@ -75,7 +75,7 @@ function preload(){
 	saveFile2Image = loadImage(`Assets/Menus/SaveFileMenu/Save File 2.png`)
 
 	saveFile3SelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 selected.png`)
-	saveFile3SteelSouBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSou-broken-selected.png`)
+	saveFile3SteelSoulBrokenSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul-broken-selected.png`)
 	saveFile3SteelSoulBrokenImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul-broken.png`)
 	saveFile3SteelSoulSelectedImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul-selected.png`)
 	saveFile3SteelSoulImage = loadImage(`Assets/Menus/SaveFileMenu/Save File 3 steelSoul.png`)
@@ -108,10 +108,14 @@ async function setup(){
 
 	//Gameplay setup
 	if(gamestate == `main`){
+		//Load Main Menu
+		console.log(`LOADING MAIN MENU`)
 		mainMenuSetup()
 	}
 	else if(gamestate == `saveFile`){
-		saveFileMenuSetup()
+		//Load Save File Menu
+		console.log(`LOADING SAVE FILE MENU`)
+		await saveFileMenuSetup()
 	}
 	else if(gamestate == `playing`){
 		console.log(`LOADING GAMEPLAY`)
@@ -254,7 +258,10 @@ function update(){
 		menuInputs(mainMenuNavigationParameters)
 	}
 	else if(gamestate == `saveFile`){
-		menuInputs(saveFileMenuNavigationParameters)
+		if(saveFileMenuNavigationParameters.length != 0){
+			//Prevents menu inputs being called before the menu has finished setup
+			menuInputs(saveFileMenuNavigationParameters)
+		}
 	}
 }
 
