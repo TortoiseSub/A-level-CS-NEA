@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Variable Setup
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //main menu images
 let playButtonImage = null
 let playButtonSelectedImage = null
@@ -36,35 +40,9 @@ let saveFile4Image = null
 let saveFileBlankSelectedImage = null
 let saveFileBlankImage = null
 
-function cleanupGameState() {
-    // Remove all sprite groups
-    if(playingSpriteGroup) {
-        playingSpriteGroup.removeAll()
-        playingSpriteGroup = undefined
-    }
-    if(mainMenu) {
-        mainMenu.removeAll()
-        mainMenu = undefined
-    }
-    if(pauseMenu) {
-        pauseMenu.removeAll()
-        pauseMenu = undefined
-    }
-    if(deathMenu) {
-        deathMenu.removeAll()
-        deathMenu = undefined
-    }
-    if(controlsMenu) {
-        controlsMenu.removeAll()
-        controlsMenu = undefined
-    }
-    if(inventoryMenu) {
-        inventoryMenu.removeAll()
-        inventoryMenu = undefined
-    }
-    // Remove any remaining sprites
-    allSprites.removeAll()
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Menu Input Functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function menuInputs(navigationParameters){
     //navigationParameters = [menuName, currentSelectedButton, buttonRange[min,max], buttonsGroup]
@@ -73,6 +51,10 @@ function menuInputs(navigationParameters){
 
     for(i = 0 ; i <= navigationParameters[2][1] ; i++){
         //NavigationParameters[2][1] is the max index of buttons in the menu
+
+        //navigationParameters[3][i] is the button at index i in the buttons group
+        console.log(navigationParameters[3][i])
+        console.log(navigationParameters[3][i].defaultImage)
         if (navigationParameters[3][i].defaultImage != null) {
             navigationParameters[3][i].image = navigationParameters[3][i].defaultImage
             navigationParameters[3][i].image.scale = 0.625
@@ -132,7 +114,7 @@ function menuInputs(navigationParameters){
         activateButton(navigationParameters[1],navigationParameters[0])
     }
     if(mouse.presses()){
-            for(let i = 0 ; i <= navigationParameters[2][1] ; i ++){
+        for(let i = 0 ; i <= navigationParameters[2][1] ; i ++){
             if(navigationParameters[3][i].mouse.hovering()){
                 for(let j = 0 ; j <= navigationParameters[2][1] ; j++){
                     navigationParameters[3][j].color = navigationParameters[3][j].defaultColor
@@ -149,15 +131,19 @@ function menuInputs(navigationParameters){
 
                 navigationParameters[1] = i
                 activateButton(navigationParameters[1],navigationParameters[0])
-            }
+                i = navigationParameters[2][1] + 1 // Exit loop
+                }
         }
     }
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Menu Button Activation Functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function activateButton(index,menu){
+    //Main menu buttons (0 = play, 1 = controls)
     if(menu == `main`){
         if(index == 0){
             openSaveFileMenu()
@@ -166,6 +152,7 @@ async function activateButton(index,menu){
             openControlsMenu()
         }
     }
+    //Save file buttons (0-3 = load, 4-7 = delete)
     else if(menu == `saveFile`){
         if(index >=0 && index <=3){
 
@@ -295,6 +282,7 @@ async function activateButton(index,menu){
             }
         }
     }
+    //Pause menu buttons (0 = resume, 1 = controls, 2 = exit to main menu)
     else if(menu == `pause`){
         if(index == 0){
             unpause()
@@ -309,50 +297,22 @@ async function activateButton(index,menu){
             openMainMenu()
         }
     }
+    //Death menu buttons (0 = respawn, 1 = exit to main menu)
     else if(menu == `death`){
         if(index == 0){
-            // Try Again
-            cleanupGameState()
-            // Reset all game state variables
-            currentHealth = maxHealth
-            immune = false
-            movementLocked = false
-            heightLocked = false
-            dashCharged = true
-            dashCold = true
-            doubleJumpCharged = true
-            doubleJumpCold = true
-            paused = false
-            world.timeScale = 1
-            
-            // Clean up all sprites and groups before restart
-            if(playingSpriteGroup) {
-                playingSpriteGroup.removeAll()
-                playingSpriteGroup = undefined
-            }
-            if(deathMenu) {
-                deathMenu.removeAll()
-                deathMenu = undefined
-            }
-            allSprites.removeAll()
-            
-            // Clean up tiles and chunks
-            cleanupTileSystem()
-            
-            // Reset game
-            gamestate = `playing`
-            setup()
+            //Respawn at last save point
+            respawnPlayer()
         }
         else if(index == 1){
-            // Main Menu
-            cleanupGameState()
-            // Clean up tiles and chunks
-            cleanupTileSystem()
-            world.timeScale = 1
-            gamestate = `main`
-            setup()
+            //Send to main menu
+            clearInterval(autoSave)
+            saveData(saveFile)
+            allSprites.remove()
+            openMainMenu()
+
         }
     }
+    //Controls menu buttons (0 - n-2 = controls, n-1 = save, n = close menu)
     else if(menu == `controls`){
         // index refers to controlsMenuButtons index (controls list + extra buttons)
         if(index < controls.length){
@@ -393,46 +353,9 @@ async function activateButton(index,menu){
     }
 }
 
-
-//Main Menu
-let mainMenu
-let mainMenuButtons
-
-let mainMenuNavigationParameters = []
-
-let mainMenuBackground
-let mainButton1
-let mainButton2
-
-let mainSelectedButton
-let mainSelectedButtonRange = [0,1]
-
-function mainMenuSetup(){
-    mainMenu = new Group()
-    mainMenuButtons = new mainMenu.Group()
-
- 	mainMenuBackground = new mainMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
-	mainMenuBackground.color = `#444444`
-
-	mainButton1 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 100,500,100,`rectangle`)		
-    mainButton1.color = `#5b5b5b`
-	mainButton1.defaultColor = `#5b5b5b`
-	mainButton1.selectedColour = `#999999`
-	mainButton1.defaultImage = playButtonImage
-	mainButton1.selectedImage = playButtonSelectedImage
-
-	mainButton2 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 100, 500,100,`rectangle`)
-	mainButton2.color = `#5b5b5b`
-	mainButton2.defaultColor = `#5b5b5b`
-	mainButton2.selectedColour = `#999999`
-	mainButton2.defaultImage = controlsButtonImage
-	mainButton2.selectedImage = controlsButtonSelectedImage
-
-    mainSelectedButton = 0
-    mainMenuButtons[0].color = `#999999`
-    mainSelectedButtonRange = [0,mainMenuButtons.length-1]
-    mainMenuNavigationParameters = [`main`,mainSelectedButton,mainSelectedButtonRange,mainMenuButtons]
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Controls Rebinding Functions                          
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Rebinding state and helpers
 let tempControls = null // temporary copy of controls while rebinding
@@ -514,6 +437,51 @@ function closeControlsMenu(){
     setup()
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Menu Setup Functions + menu variables
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Main Menu
+let mainMenu
+let mainMenuButtons
+
+let mainMenuNavigationParameters = []
+
+let mainMenuBackground
+let mainButton1
+let mainButton2
+
+let mainSelectedButton
+let mainSelectedButtonRange = [0,1]
+
+function mainMenuSetup(){
+    mainMenu = new Group()
+    mainMenuButtons = new mainMenu.Group()
+
+ 	mainMenuBackground = new mainMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
+	mainMenuBackground.color = `#444444`
+
+	mainButton1 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 100,500,100,`rectangle`)		
+    mainButton1.color = `#5b5b5b`
+	mainButton1.defaultColor = `#5b5b5b`
+	mainButton1.selectedColour = `#999999`
+	mainButton1.defaultImage = playButtonImage
+	mainButton1.selectedImage = playButtonSelectedImage
+
+	mainButton2 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 100, 500,100,`rectangle`)
+	mainButton2.color = `#5b5b5b`
+	mainButton2.defaultColor = `#5b5b5b`
+	mainButton2.selectedColour = `#999999`
+	mainButton2.defaultImage = controlsButtonImage
+	mainButton2.selectedImage = controlsButtonSelectedImage
+
+    mainSelectedButton = 0
+    mainMenuButtons[0].color = `#999999`
+    mainSelectedButtonRange = [0,mainMenuButtons.length-1]
+    mainMenuNavigationParameters = [`main`,mainSelectedButton,mainSelectedButtonRange,mainMenuButtons]
+}
+
 //Inventory Menu
 let inventoryMenu
 let inventoryMenuButtons
@@ -560,7 +528,7 @@ function inventoryMenuSetup() {
     inventoryMenuNavigationParameters = ['inventory', inventorySelectedButton, inventorySelectedButtonRange, inventoryMenuButtons]
 }
 
-    //SaveFilesMenu
+//SaveFilesMenu
 let saveFileMenuNavigationParameters = []
 
 let saveFileMenu
@@ -981,6 +949,10 @@ function drawDeathMenuLabels() {
     text('Main Menu', deathButton2.x, deathButton2.y)
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Menu Open/Close Functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function pause(){
     gamestate = `paused`
 	paused = true
@@ -1067,4 +1039,15 @@ async function openSaveFile(index){
         closeSaveFileMenu()
         setup()
     }
+}
+
+function respawnPlayer(){
+    //Set health to max
+    //teleport to last save position using save position variable
+    //set gamestate to playing
+    //close death menu
+
+    player.heal(`Max`)
+    teleport(player, savePointIndex[currentSaveLocation][1], savePointIndex[currentSaveLocation][2] - (tileSize/2))
+    closeDeathMenu()
 }
