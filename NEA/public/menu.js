@@ -2,13 +2,14 @@
 /// Variable Setup
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//main menu images
+////main menu images
 let playButtonImage = null
 let playButtonSelectedImage = null
 let controlsButtonImage = null
 let controlsButtonSelectedImage = null
 
-// Save file menu images (instantiated here so preload can assign)
+//// Save file menu images (instantiated here so preload can assign)
+//Save file 1
 let saveFile1SelectedImage = null
 let saveFile1SteelSoulBrokenSelectedImage = null
 let saveFile1SteelSoulBrokenImage = null
@@ -16,6 +17,7 @@ let saveFile1SteelSoulSelectedImage = null
 let saveFile1SteelSoulImage = null
 let saveFile1Image = null
 
+//save file 2
 let saveFile2SelectedImage = null
 let saveFile2SteelSoulBrokenSelectedImage = null
 let saveFile2SteelSoulBrokenImage = null
@@ -23,6 +25,7 @@ let saveFile2SteelSoulSelectedImage = null
 let saveFile2SteelSoulImage = null
 let saveFile2Image = null
 
+//Save file 3
 let saveFile3SelectedImage = null
 let saveFile3SteelSoulBrokenSelectedImage = null
 let saveFile3SteelSoulBrokenImage = null
@@ -30,15 +33,13 @@ let saveFile3SteelSoulSelectedImage = null
 let saveFile3SteelSoulImage = null
 let saveFile3Image = null
 
+//Save file 4
 let saveFile4SelectedImage = null
 let saveFile4SteelSoulBrokenSelectedImage = null
 let saveFile4SteelSoulBrokenImage = null
 let saveFile4SteelSoulSelectedImage = null
 let saveFile4SteelSoulImage = null
 let saveFile4Image = null
-
-let saveFileBlankSelectedImage = null
-let saveFileBlankImage = null
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Menu Input Functions
@@ -53,12 +54,12 @@ function menuInputs(navigationParameters){
         //NavigationParameters[2][1] is the max index of buttons in the menu
 
         //navigationParameters[3][i] is the button at index i in the buttons group
-        console.log(navigationParameters[3][i])
-        console.log(navigationParameters[3][i].defaultImage)
         if (navigationParameters[3][i].defaultImage != null) {
             navigationParameters[3][i].image = navigationParameters[3][i].defaultImage
             navigationParameters[3][i].image.scale = 0.625
         }
+
+        //navigationParameters[1] is the current selected button index
         if(i == navigationParameters[1]){
             if(navigationParameters[3][i].selectedImage != null){
                 navigationParameters[3][i].image = navigationParameters[3][i].selectedImage
@@ -178,7 +179,8 @@ async function activateButton(index,menu){
                 }   
                 callWriteData(writeFilepath, blankdata)
 
-                // Refresh the save file menu to reflect deletion
+                // Refresh the save file menu images after deletion
+                //load save file data and reassign images off of the save files type tag 
                 let save1Data
                 let save2Data
                 let save3Data
@@ -334,7 +336,7 @@ async function activateButton(index,menu){
                         }
                     }
                     // Save the new control scheme to all save files
-                    updateContols()
+                    updateControls()
                 }
             }
             else if(action == `close menu`){
@@ -424,19 +426,6 @@ function cancelRebind(){
     }
     rebindTarget = null
 }
-
-function closeControlsMenu(){
-    // Close the controls menu and return to previous state
-    controlsMenu.remove()
-    // restore gamestate to lastGamestate if set
-    if(typeof lastGamestate !== 'undefined'){
-        gamestate = lastGamestate
-    } else {
-        gamestate = `main`
-    }
-    setup()
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Menu Setup Functions + menu variables
@@ -1049,5 +1038,6 @@ function respawnPlayer(){
 
     player.heal(`Max`)
     teleport(player, savePointIndex[currentSaveLocation][1], savePointIndex[currentSaveLocation][2] - (tileSize/2))
+    gamestate = `playing`
     closeDeathMenu()
 }

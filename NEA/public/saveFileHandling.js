@@ -31,7 +31,7 @@ function receiveWriteData(err){
 }
 
 //Encryption
-async function updateContols(){
+async function updateControls(){
     let saveData1 = await readSaveData(1)
     saveData1.controls = controls
     saveData(saveData1)
@@ -44,6 +44,9 @@ async function updateContols(){
     let saveData4 = await readSaveData(4)
     saveData4.controls = controls
     saveData(saveData4)
+    let saveDataBlank = await readSaveData(`blank`)
+    saveDataBlank.controls = controls
+    saveData(saveDataBlank)
 }
 
 async function saveData(saveFile){
@@ -81,6 +84,9 @@ async function readSaveData(saveFile){
     }
     else if(saveFile == 4){
         filepath = `Savefiles/saveFileFour.txt`
+    }
+    else if(saveFile == `blank`){
+        filepath = `Savefiles/saveFileBlank.txt`
     }
 
     console.log('Reading from : ' + filepath)

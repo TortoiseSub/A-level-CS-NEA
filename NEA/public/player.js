@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Player Variables Setup
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 let player
 let playerModel
 let knightSpriteSheet
@@ -27,6 +31,10 @@ let activeAnimationIsBaseState = true //If the currently running animation is a 
 
 let animationRequestQueue = []
 let animationEndQueue = []
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Player model definition
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function loadPlayerModel(){
 	playerModel = new playingSpriteGroup.Group()
@@ -85,6 +93,11 @@ function loadPlayerModel(){
 	jTop.visible = false
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Player animation functions 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Initialize player animations 
 function loadPlayerAnis(){
 	player.spriteSheet = knightSpriteSheet
 	player.addAnis({
@@ -112,7 +125,7 @@ function loadPlayerAnis(){
 }
 
 
-
+//Function to change base animation state
 function changeBaseAnimationState(){
 	//Updates the base animation state based on the player's current state
 	if(bottomSensor.overlapping(walkable)){
@@ -132,6 +145,8 @@ function changeBaseAnimationState(){
 		}
 	}
 }
+
+//Function to find the highest priority animation request or set to base state if no animation requests
 function findCurrentAnimation(){
 	//Cycle incoming requests and choose the highest priority 
 	currentAnimationPriority = 0
@@ -155,6 +170,7 @@ function findCurrentAnimation(){
 	animationRequestQueue = []
 }
 
+//Function to change the player's animation based on currentAnimation and its priority
 function changePlayerAni(){
 	//if the currentAnimation is a base state
 	if (currentAnimationIsBaseState){
@@ -187,6 +203,7 @@ function changePlayerAni(){
 	}
 }
 
+//Function to reset the animation to base state after a non-base state animation ends
 function resetAnimation(){
 	if(activeAnimation == animationEndQueue[0]){
 		currentAnimation = baseAnimationState
@@ -199,6 +216,7 @@ function resetAnimation(){
 	}
 	animationEndQueue.splice(0,1)
 }
+//Function to change the player's animation each frame
 function changePlayerAnimation(){
 	changeBaseAnimationState()
 	findCurrentAnimation()
@@ -207,6 +225,11 @@ function changePlayerAnimation(){
 	player.ani.frameDelay = 4
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Player HUD and Health functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Function to display the player's HUD
 function displayHUD(){
 	camera.off()
 	image(HUDCasingImg, 25, 5, 256, 128)
@@ -222,6 +245,7 @@ function displayHUD(){
 	camera.on()
 }
 
+//Function to reduce the player's health
 function loseHealth(quantity){
 	if(currentHealth > 0 && !immune){
 		currentHealth -= quantity
@@ -243,6 +267,7 @@ function loseHealth(quantity){
 	}
 }
 
+//Function to increase the player's health
 function heal(quantity){
 	if(quantity == `Max`){
 		currentHealth = maxHealth
@@ -256,6 +281,7 @@ function heal(quantity){
 	}
 }
 
+//Function to handle the players iFrames timer
 function immunityTimeout(){
 	if(paused){
 		scheduledUnpauseFunctions.push([immunityTimeout,(world.realTime - pauseStart)])
@@ -268,22 +294,15 @@ function immunityTimeout(){
 	}
 }
 
-function setupControls(){
-	controls = [
-		[`left`,[`arrowLeft`,``]],
-		[`right`,[`arrowRight`,``]],
-		[`jump`,[`z`,``]],
-		//[`attack`,[`x`,``]],
-		[`dash`,[`c`,``]],
-		[`pause`,[`ESCAPE`,``]],
-		[`inventory`,[`i`,``]],
-		[`interact`,[`arrowUp`,``]],
-		//[`QuickMap`,[`TAB`,``]],
-		//[`lookUp`,[`UPARROW`,``]],
-		//[`lookDown`,[`DOWNARROW`,``]],
-		//[`focus`,[`a`,``]],
-		//controls[i][1][index]
-	]
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Player Control systems
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Pull key bindings from save files 
+async function setupControls(){
+	let blankFileData = await readSaveData(`blank`)
+	let controlData = blankFileData.controls
+	controls = controlData
 }
 function getKeyBinding(action, index){
 	for(let i = 0; i < controls.length; i++){
