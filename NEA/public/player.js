@@ -2,21 +2,24 @@
 /// Player Variables Setup
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let player
-let playerModel
-let knightSpriteSheet
+let player //player sprite
+let playerModel //Physics group for player and its sensors
+let knightSpriteSheet //Player sprite sheet
 
 let currentHealth = 8
 let maxHealth = 8
 
-let immune = false
+let immune = false //Prevents player from taking damage
 let IFrameDuration = 1300 //Duration of invincibility frames in ms
 
+//Player HUD images
 let HUDCasingImg
 let shieldImg	
 let brokenShieldImg
 let shieldCasingImg
 
+////Animation state variables
+//Image tag switches animation set based on current items 
 let currentItemTag = `_null` // This can be changed to `_sword`, `_cape`, `_sword_cape` or `_null` based on the player's current items
 
 let baseAnimationState = `idle_null` // The current Base animation state
@@ -50,6 +53,7 @@ function loadPlayerModel(){
 
     //player.debug = true
 
+	//Collision/Overlap sensor on the bottom of the player model
     bottomSensor = new playerModel.Sprite(player.x, player.y + (22/2), 17 - 4,1)
 	bottomSensor.mass = 0.01
 	bottomSensor.collider = `n`
@@ -58,6 +62,7 @@ function loadPlayerModel(){
 	bottomSensor.bounciness = 0
 	bottomSensor.friction = 0
 
+	//Collision/Overlap sensor on the left of the player model
 	leftSensor = new playerModel.Sprite(player.x - (17/2), player.y,1,22 -8 )
 	leftSensor.mass = 0.01
 	leftSensor.collider = `n`
@@ -66,7 +71,7 @@ function loadPlayerModel(){
 	leftSensor.bounciness = 0
 	leftSensor.friction = 0
 
-
+	//Collision/Overlap sensor on the right of the player model
 	rightSensor = new playerModel.Sprite(player.x + (17/2), player.y, 1,22 - 8 )
 	rightSensor.mass = 0.01
 	rightSensor.collider = `n`
@@ -75,6 +80,7 @@ function loadPlayerModel(){
 	rightSensor.bounciness = 0
 	rightSensor.friction = 0
 
+	//Collision/Overlap sensor on the top of the player model
 	topSensor = new playerModel.Sprite(player.x, player.y - (22/2), 17 - 4,1)
 	topSensor.mass = 0.01
 	topSensor.collider = `n`
@@ -83,6 +89,7 @@ function loadPlayerModel(){
 	topSensor.bounciness = 0
 	topSensor.friction = 0
 
+	//Glue joints to hold sensors to player model
     let jbottom = new GlueJoint(player,bottomSensor)
 	jbottom.visible = false
 	let jLeft = new GlueJoint(player,leftSensor)

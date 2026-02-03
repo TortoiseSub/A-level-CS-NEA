@@ -1,8 +1,12 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Client side save file handling for server communication
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var socket = io.connect()
 socket.on(`receiveReadData`, (data) => { receiveReadData(data) })
 socket.on(`receiveWriteData`, (data) => { receiveWriteData(data) })
 
-
+//Send data to server to write to file
 function callWriteData(filepath, data){
     let transferData ={
         filepath : filepath,
@@ -11,6 +15,7 @@ function callWriteData(filepath, data){
     socket.emit(`callWriteData`, (transferData))
 }
 
+//Request data from server to read from file
 async function callReadData(filepath){
     return new Promise((resolve,reject) => {
         socket.emit(`callReadData`, (filepath), (transferData) => {
@@ -25,12 +30,17 @@ async function callReadData(filepath){
     })
 }
 
+// Receive write data confirmation from server
 function receiveWriteData(err){
     console.log('write errors : ' + err)
 
 }
 
-//Encryption
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Read, write, load and save data
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Write updated control settings to all save files
 async function updateControls(){
     let saveData1 = await readSaveData(1)
     saveData1.controls = controls
@@ -49,11 +59,16 @@ async function updateControls(){
     saveData(saveDataBlank)
 }
 
+// Save data to specified save file
 async function saveData(saveFile){
+    // Gather data to be saved 
     let data = getSavingData()
-    let writeData = await encryptData(data)
-    let filepath
 
+    // Encrypt data 
+    let writeData = await encryptData(data)
+
+    //Asign file path based on save file selected
+    let filepath
     if(saveFile == `blank`){
         filepath = `Savefiles/blankSaveFile.txt`
     }
@@ -69,9 +84,14 @@ async function saveData(saveFile){
     else if(saveFile == 4){
         filepath = `Savefiles/saveFileFour.txt`
     }
+
+    // Send data to server to write to file 
     callWriteData(filepath, writeData)
 }
+
 async function readSaveData(saveFile){
+
+    //Asign file path based on save file selected
     let filepath
     if(saveFile == 1){
         filepath = `Savefiles/saveFileOne.txt`
@@ -89,19 +109,23 @@ async function readSaveData(saveFile){
         filepath = `Savefiles/saveFileBlank.txt`
     }
 
+
     console.log('Reading from : ' + filepath)
+    // Request encrypted data from server
     let encryptedData = await callReadData(filepath)
+    // Decrypt data
     let data = await decryptData(encryptedData)
+    // Convert data to a dictionary
     let saveData = JSON.parse(data)
     return saveData
 }
 
-async function loadSaveData(saveFile){
+async function loadSaveData(saveFile){ // Load data from specified save file and implement into the game
     let saveData = await readSaveData(saveFile)
     implementSavingData(saveData)
 }
 
-function implementSavingData(saveData){
+function implementSavingData(saveData){ // Assign variables from the loaded data 
     jumpHacked = saveData.jumpHacked
     doubleJumpUnlocked = saveData.doubleJumpUnlocked
     dashUnlocked = saveData.dashUnlocked
@@ -118,6 +142,7 @@ function implementSavingData(saveData){
 }
 
 function getSavingData(){
+    // Gather all data to be saved into a dictionary and convert to string
     let saveData = {
         jumpHacked : jumpHacked,
         doubleJumpUnlocked : doubleJumpUnlocked,
@@ -132,10 +157,18 @@ function getSavingData(){
     saveData = JSON.stringify(saveData)
     return saveData
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Encryption and Decryption functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Generate a random 64 bit string
 function generateSalt(){
     let salt = ``
+    // Count number of 0s and 1s for testing randomness
     let quantity1 = 0
     let quantity0 = 0
+
     let value 
     for(let i = 0 ; i < 64;i ++){
         value = Math.random()
@@ -150,6 +183,8 @@ function generateSalt(){
     }
     return salt
 }
+
+// Generate HMAC for data integrity verification
 async function generateHMAC(data,key){
     let HMACInput = data + key
     let MAC = ``
@@ -168,7 +203,7 @@ async function generateHMAC(data,key){
     return MAC
 }
 
-
+//Cipher and DeCipher functions using XOR masking and SHA-256 hashing for key generation
 async function cipherData(data,initialState){
     //Test data : TestData123!@#_Example$%^&*(2025)-+=[]{}|;:'",.<>?/`~
     let plainTextCodes = []
@@ -260,6 +295,8 @@ async function deCipherData(data,initialState){
     }
     return plainText
 }
+
+//Encrypt and Decrypt functions with HMAC for data integrity verification
 async function decryptData(data){
     let knownKey = `101000000100001111101111101110001001010010000011010010000100101011101100111110001011001110010001111111001111100110101001100001111110100100001000100000101101101110010000111011010111010010111011`
 
@@ -299,6 +336,7 @@ async function encryptData(data){
     return sealedData
 }
 
+//Function for generating a hash based off two parameters
 async function hash256(parameter1,parameter2){
     let hashInput = parameter1 + parameter2
     let hashOutput = ``

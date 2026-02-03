@@ -49,7 +49,6 @@ function menuInputs(navigationParameters){
     //navigationParameters = [menuName, currentSelectedButton, buttonRange[min,max], buttonsGroup]
     //Navigation parameters holds all the menu navigation data
 
-
     for(i = 0 ; i <= navigationParameters[2][1] ; i++){
         //NavigationParameters[2][1] is the max index of buttons in the menu
 
@@ -67,6 +66,7 @@ function menuInputs(navigationParameters){
             }
         }
     }
+    //increase the selected button index
     if(kb.presses(`down`)){
         navigationParameters[1] += 1
         //Loop if above max range
@@ -75,20 +75,23 @@ function menuInputs(navigationParameters){
         }
 
         for(i = 0 ; i <= navigationParameters[2][1] ; i++){
+            //Iterate through all buttons to reset their colours and images
             navigationParameters[3][i].color = navigationParameters[3][i].defaultColor
-            if (navigationParameters[3][i].defaultImage != null) {
+            if (navigationParameters[3][i].defaultImage != null) { //Validate that a default image exists before setting
                 navigationParameters[3][i].image = navigationParameters[3][i].defaultImage
                 navigationParameters[3][i].image.scale = 0.625
             }
+            //Iterate through all buttons and set the selected button to their selected colour and image
             if(i == navigationParameters[1]){
                 navigationParameters[3][i].color = navigationParameters[3][i].selectedColour
-                if(navigationParameters[3][i].selectedImage != null){
+                if(navigationParameters[3][i].selectedImage != null){ // Validate that a selected image exists before setting
                     navigationParameters[3][i].image = navigationParameters[3][i].selectedImage
                     navigationParameters[3][i].image.scale = 0.625
                 }
             }
         }
     }
+    //Decrease the selected button index
     else if(kb.presses(`up`)){
         navigationParameters[1] -= 1
         //Loop if below min range
@@ -96,40 +99,48 @@ function menuInputs(navigationParameters){
             navigationParameters[1] = navigationParameters[2][1]
         }
 
+
         for(i = 0 ; i <= navigationParameters[2][1] ; i++){
+            //Iterate through all buttons to reset their colours and images
             navigationParameters[3][i].color = navigationParameters[3][i].defaultColor
-            if(navigationParameters[3][i].defaultImage != null  ) {
+            if(navigationParameters[3][i].defaultImage != null  ) { //Validate that a default image exists before setting
                 navigationParameters[3][i].image = navigationParameters[3][i].defaultImage
                 navigationParameters[3][i].image.scale = 0.625
             }
-            if(i == navigationParameters[1]){
+            //Iterate through all buttons and set the selected button to their selected colour and image
+            if(i == navigationParameters[1]){ 
                 navigationParameters[3][i].color = navigationParameters[3][i].selectedColour
-                if(navigationParameters[3][i].selectedImage != null){
+                if(navigationParameters[3][i].selectedImage != null){ // Validate that a selected image exists before setting
                     navigationParameters[3][i].image = navigationParameters[3][i].selectedImage
                     navigationParameters[3][i].image.scale = 0.625
                 }
             }
         }
     }
-    if(kb.pressed(`ENTER`)){
+    if(kb.pressed(`ENTER`)){ // Activate selected button 
         activateButton(navigationParameters[1],navigationParameters[0])
     }
+
+    // Mouse input for menu buttons
     if(mouse.presses()){
-        for(let i = 0 ; i <= navigationParameters[2][1] ; i ++){
-            if(navigationParameters[3][i].mouse.hovering()){
+        for(let i = 0 ; i <= navigationParameters[2][1] ; i ++){ //Iterate through all buttons to check if the mouse is overlapping any 
+            if(navigationParameters[3][i].mouse.hovering()){ // P5.js mouse overlap check
+                // Iterate through all buttons to reset their colours and images
                 for(let j = 0 ; j <= navigationParameters[2][1] ; j++){
                     navigationParameters[3][j].color = navigationParameters[3][j].defaultColor
-                    if(navigationParameters[3][j].defaultImage != null){
+                    if(navigationParameters[3][j].defaultImage != null){ //Validate that a default image exists before setting
                         navigationParameters[3][j].image = navigationParameters[3][j].defaultImage
                         navigationParameters[3][j].image.scale = 0.625
                     }
                 }
+                // Set the overlapped button to its selected colour and image
                 navigationParameters[3][i].color = navigationParameters[3][i].selectedColour
-                if(navigationParameters[3][i].selectedImage != null){
+                if(navigationParameters[3][i].selectedImage != null){ // Validate that a selected image exists before setting
                     navigationParameters[3][i].image = navigationParameters[3][i].selectedImage
                     navigationParameters[3][i].image.scale = 0.625
                 }
 
+                // Activate the overlapped button
                 navigationParameters[1] = i
                 activateButton(navigationParameters[1],navigationParameters[0])
                 i = navigationParameters[2][1] + 1 // Exit loop
@@ -155,28 +166,33 @@ async function activateButton(index,menu){
     }
     //Save file buttons (0-3 = load, 4-7 = delete)
     else if(menu == `saveFile`){
+        //Check if file is between 0 and 3 inclusive 
         if(index >=0 && index <=3){
-
             openSaveFile(index)
         }
+        //Cjeck if file is between 4 and 7 inclusive
         else if(index >=4 && index <=7){
+            //Offer user a comfirmation prompt before deleting the save file
             let comfirmation = window.confirm("Are you sure you want to delete this save file?")
             if(comfirmation){
+                //Retrieve blank save file data and overwrite the selected save file with it 
                 let writeFilepath = ``
                 let blankdata = await callReadData(`Savefiles/saveFileBlank.txt`)
 
-                if(index == 4){
+                //Find the file path to overwrite based on the button index
+                if(index == 4){ // Delete save file 1
                     writeFilepath = `Savefiles/saveFileOne.txt`
                 }
-                else if(index == 5){
+                else if(index == 5){ // Delete save file 2
                     writeFilepath = `Savefiles/saveFileTwo.txt`
                 }
-                else if(index == 6){
+                else if(index == 6){ // Delete save file 3
                     writeFilepath = `Savefiles/saveFileThree.txt`
                 }
-                else if(index == 7){
+                else if(index == 7){ // Delete save file 4
                     writeFilepath = `Savefiles/saveFileFour.txt`
                 }   
+                //Overwrite the selected save file with blank data
                 callWriteData(writeFilepath, blankdata)
 
                 // Refresh the save file menu images after deletion
@@ -286,13 +302,13 @@ async function activateButton(index,menu){
     }
     //Pause menu buttons (0 = resume, 1 = controls, 2 = exit to main menu)
     else if(menu == `pause`){
-        if(index == 0){
+        if(index == 0){ //Resume game
             unpause()
         }
-        else if(index == 1){
+        else if(index == 1){ //Open controls menu
             openControlsMenu()
         }
-        else if(index == 2){
+        else if(index == 2){ //Exit to main menu
             clearInterval(autoSave)
             saveData(saveFile)
             allSprites.remove()
@@ -301,11 +317,11 @@ async function activateButton(index,menu){
     }
     //Death menu buttons (0 = respawn, 1 = exit to main menu)
     else if(menu == `death`){
-        if(index == 0){
+        if(index == 0){ //Resume game
             //Respawn at last save point
             respawnPlayer()
         }
-        else if(index == 1){
+        else if(index == 1){ //Quit to main menu
             //Send to main menu
             clearInterval(autoSave)
             saveData(saveFile)
@@ -387,14 +403,15 @@ function startRebind(controlIndex){
         // Use e.key to keep descriptive names like 'ArrowLeft' or 'a'
         let keyName = e.key
 
-        // Normalize Space -> Space for display
-        if(keyName === ' ') keyName = 'Space'
+        // Space for display
+        if(keyName === ' '){
+            keyName = 'Space'
+        }
 
         // Prevent binding of Enter/Escape used for UI control (optional)
         if(keyName === 'Enter' || keyName === 'Escape'){
             // treat as cancel
             cancelRebind()
-            return
         }
 
         // Unbind any other control that was already using this key in tempControls
@@ -444,21 +461,30 @@ let mainButton2
 let mainSelectedButton
 let mainSelectedButtonRange = [0,1]
 
-function mainMenuSetup(){
+function mainMenuSetup(){ // Initialize main menu and main menu buttons 
+    // Validate windowWidth and windowHeight before using them
+    let w = windowWidth || window.innerWidth || 1024
+    let h = windowHeight || window.innerHeight || 768
+    w = Math.max(1, Math.min(Number.isFinite(w) ? parseInt(w) : 1024, 4096))
+    h = Math.max(1, Math.min(Number.isFinite(h) ? parseInt(h) : 768, 4096))
+
+
     mainMenu = new Group()
     mainMenuButtons = new mainMenu.Group()
 
- 	mainMenuBackground = new mainMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
+ 	mainMenuBackground = new mainMenu.Sprite(w/2,h/2,w,h,`rectangle`)
 	mainMenuBackground.color = `#444444`
 
-	mainButton1 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 100,500,100,`rectangle`)		
+    //Save file menu button
+	mainButton1 = new mainMenuButtons.Sprite(w/2,h/2 - 100,500,100,`rectangle`)		
     mainButton1.color = `#5b5b5b`
 	mainButton1.defaultColor = `#5b5b5b`
 	mainButton1.selectedColour = `#999999`
 	mainButton1.defaultImage = playButtonImage
 	mainButton1.selectedImage = playButtonSelectedImage
 
-	mainButton2 = new mainMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 100, 500,100,`rectangle`)
+    //Controls menu button
+	mainButton2 = new mainMenuButtons.Sprite(w/2,h  /2 + 100, 500,100,`rectangle`)
 	mainButton2.color = `#5b5b5b`
 	mainButton2.defaultColor = `#5b5b5b`
 	mainButton2.selectedColour = `#999999`
@@ -488,7 +514,7 @@ function inventoryMenuSetup() {
     inventoryMenu = new Group()
     inventoryMenuButtons = new inventoryMenu.Group()
 
-    // Example layout: 5 columns x 4 rows (adjust as needed)
+    // Example layout: 5 columns x 4 rows
     let boxWidth = 80
     let boxHeight = 80
     let startX = windowWidth/2 - 2.5*boxWidth
@@ -536,7 +562,7 @@ let saveFileButton8
 let saveFileSelectedButton = 0
 let saveFileSelectedButtonRange = [0,3]
 
-async function saveFileMenuSetup(){
+async function saveFileMenuSetup(){ // Initialize save file menu and save file menu buttons
     // Validate windowWidth and windowHeight before using them
     let w = windowWidth || window.innerWidth || 1024
     let h = windowHeight || window.innerHeight || 768
@@ -549,6 +575,7 @@ async function saveFileMenuSetup(){
     saveFileMenuBackground = new saveFileMenu.Sprite(w/2, h/2, w, h, `rectangle`)
     saveFileMenuBackground.color = `#444444`
 
+    // Save file 1 button
     saveFileButton1 = new saveFileMenuButtons.Sprite(w/2 - 100, h/2 - 180, 700, 100, `rectangle`)        
     saveFileButton1.color = `#5b5b5b`
     saveFileButton1.defaultColor = `#5b5b5b`
@@ -556,6 +583,7 @@ async function saveFileMenuSetup(){
     saveFileButton1.defaultImage = null
     saveFileButton1.selectedImage = null
 
+    // Save file 2 button
     saveFileButton2 = new saveFileMenuButtons.Sprite(w/2 - 100, h/2 - 60, 700, 100, `rectangle`)
     saveFileButton2.color = `#5b5b5b`
     saveFileButton2.defaultColor = `#5b5b5b`
@@ -563,6 +591,7 @@ async function saveFileMenuSetup(){
     saveFileButton2.defaultImage = null
     saveFileButton2.selectedImage = null
 
+    // Save file 3 button
     saveFileButton3 = new saveFileMenuButtons.Sprite(windowWidth/2 - 100,windowHeight/2 + 60, 700,100,`rectangle`)
     saveFileButton3.color = `#5b5b5b`
     saveFileButton3.defaultColor = `#5b5b5b`
@@ -570,6 +599,7 @@ async function saveFileMenuSetup(){
     saveFileButton3.defaultImage = null
     saveFileButton3.selectedImage = null
 
+    // Save file 4 button
     saveFileButton4 = new saveFileMenuButtons.Sprite(windowWidth/2 - 100,windowHeight/2 + 180, 700,100,`rectangle`)
     saveFileButton4.color = `#5b5b5b`
     saveFileButton4.defaultColor = `#5b5b5b`
@@ -577,6 +607,7 @@ async function saveFileMenuSetup(){
     saveFileButton4.defaultImage = null
     saveFileButton4.selectedImage = null
 
+    // Delete save file 1 button
     saveFileButton5 = new saveFileMenuButtons.Sprite(windowWidth/2 + 325,windowHeight/2 - 180,100,100,`rectangle`)
     saveFileButton5.color = `#5b5b5b`
     saveFileButton5.defaultColor = `#5b5b5b`
@@ -584,6 +615,7 @@ async function saveFileMenuSetup(){
     saveFileButton5.defaultImage = null
     saveFileButton5.selectedImage = null
 
+    // Delete save file 2 button
     saveFileButton6 = new saveFileMenuButtons.Sprite(windowWidth/2 + 325,windowHeight/2 - 60, 100,100,`rectangle`)
     saveFileButton6.color = `#5b5b5b`
     saveFileButton6.defaultColor = `#5b5b5b`
@@ -591,6 +623,7 @@ async function saveFileMenuSetup(){
     saveFileButton6.defaultImage = null
     saveFileButton6.selectedImage = null    
 
+    // Delete save file 3 button
     saveFileButton7 = new saveFileMenuButtons.Sprite(windowWidth/2 + 325,windowHeight/2 + 60, 100,100,`rectangle`)  
     saveFileButton7.color = `#5b5b5b`
     saveFileButton7.defaultColor = `#5b5b5b`
@@ -598,6 +631,7 @@ async function saveFileMenuSetup(){
     saveFileButton7.defaultImage = null
     saveFileButton7.selectedImage = null
 
+    // Delete save file 4 button
     saveFileButton8 = new saveFileMenuButtons.Sprite(windowWidth/2 + 325,windowHeight/2 + 180, 100,100,`rectangle`)     
     saveFileButton8.color = `#5b5b5b`
     saveFileButton8.defaultColor = `#5b5b5b`
@@ -727,29 +761,37 @@ let pauseButton3
 let pauseSelectedButton = 0
 let pauseSelectedButtonRange = [0,2]
 
-function pauseMenuSetup(){
+function pauseMenuSetup(){ // Initialize pause menu and pause menu buttons
+    // Validate windowWidth and windowHeight before using them
+    let w = windowWidth || window.innerWidth || 1024
+    let h = windowHeight || window.innerHeight || 768
+    w = Math.max(1, Math.min(Number.isFinite(w) ? parseInt(w) : 1024, 4096))
+    h = Math.max(1, Math.min(Number.isFinite(h) ? parseInt(h) : 768, 4096))
+
     pauseMenu = new Group()
     pauseMenuButtons = new pauseMenu.Group()
 
- 	pauseMenuBackground = new pauseMenu.Sprite(windowWidth/2,windowHeight/2,windowWidth,windowHeight,`rectangle`)
+ 	pauseMenuBackground = new pauseMenu.Sprite(w/2,h/2,w,h,`rectangle`)
 	pauseMenuBackground.color = `#444444`
     pauseMenuBackground.opacity = 0.5
 
-	pauseButton1 = new pauseMenuButtons.Sprite(windowWidth/2,windowHeight/2 - 150,500,100,`rectangle`)		
+    //Resume game button
+	pauseButton1 = new pauseMenuButtons.Sprite(w/2,h/2 - 150,500,100,`rectangle`)		
     pauseButton1.color = `#5b5b5b`
 	pauseButton1.defaultColor = `#5b5b5b`
 	pauseButton1.selectedColour = `#999999`
 	pauseButton1.defaultImage = null
 	pauseButton1.selectedImage = null
-
-	pauseButton2 = new pauseMenuButtons.Sprite(windowWidth/2,windowHeight/2, 500,100,`rectangle`)
+    // Controls menu button
+	pauseButton2 = new pauseMenuButtons.Sprite(w/2,h/2, 500,100,`rectangle`)
 	pauseButton2.color = `#5b5b5b`
 	pauseButton2.defaultColor = `#5b5b5b`
 	pauseButton2.selectedColour = `#999999`
 	pauseButton2.defaultImage = null
 	pauseButton2.selectedImage = null
     	
-    pauseButton3 = new pauseMenuButtons.Sprite(windowWidth/2,windowHeight/2 + 150, 500,100,`rectangle`)
+    // Save and exit button
+    pauseButton3 = new pauseMenuButtons.Sprite(w/2,h/2 + 150, 500,100,`rectangle`)
 	pauseButton3.color = `#5b5b5b`
 	pauseButton3.defaultColor = `#5b5b5b`
 	pauseButton3.selectedColour = `#999999`
@@ -773,7 +815,7 @@ let controlsMenuBackground
 let controlsSelectedButton = 0
 let controlsSelectedButtonRange 
 
-function controlsMenuSetup(){
+function controlsMenuSetup(){ // Initialize controls menu and controls menu buttons
     console.log(`setting up controls menu`)
     controlsMenu = new Group()
     controlsMenuButtons = new controlsMenu.Group()
@@ -895,7 +937,7 @@ let deathButton2
 let deathSelectedButton = 0
 let deathSelectedButtonRange = [0,1]
 
-function deathMenuSetup() {
+function deathMenuSetup() { // Initialize death menu and death menu buttons
     deathMenu = new Group()
     deathMenuButtons = new deathMenu.Group()
 
@@ -942,7 +984,8 @@ function drawDeathMenuLabels() {
 /// Menu Open/Close Functions
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function pause(){
+function pause(){ 
+    //Stop physics time by activating pause state and record the current time 
     gamestate = `paused`
 	paused = true
 	pauseStart = world.realTime
@@ -951,53 +994,67 @@ function pause(){
 }
 
 function unpause(){
+    // Resume physics time by restoring playing state and calculating pause duration
     gamestate = `playing`
 	paused = false
 	pauseEnd = world.realTime
 	pauseDuration = pauseEnd - pauseStart
 	world.timeScale = 1
+
+    // Reschedule any timeout functions that were called during the game pause
 	for(i = 0; i < scheduledUnpauseFunctions.length; i++){
 		setTimeout(scheduledUnpauseFunctions[i][0],scheduledUnpauseFunctions[i][1])
 	}
+
+    //Close the pause menu
     pauseMenu.remove()
 
 }
 
 function openDeathMenu(){
+    console.log(`opening death menu`)
     lastGamestate = gamestate
     gamestate = `gameOver`
     setup()
 }
 
 function closeDeathMenu(){
+    console.log(`closing death menu`)
     deathMenu.remove()
     console.log(`removed all`)
 }   
 
 function openSaveFileMenu(){
+    console.log(`opening save file menu`)
     lastGamestate = gamestate
     closeMainMenu()
     gamestate = `saveFile`
     setup()
 }
 async function closeSaveFileMenu(){
+    console.log(`closing save file menu`)
     await saveData(saveFile)
     saveFileMenu.remove()
     console.log(`removed all`)
 }
 
 function openControlsMenu(){
+    console.log(`opening controls menu`)
     lastGamestate = gamestate
     gamestate = `controls`
     setup()
 }
 function closeControlsMenu(){
+    //Cleat control menu sprites and return to the last gameState (main menu or pause menu)
+    console.log(`closing controls menu`)
     controlsMenu.remove()
     gamestate = lastGamestate
     lastGamestate = controls
 }
 
 function openMainMenu(){
+    //Clear all sprites and reset gameState to main menu
+    console.log(`opening main menu`)
     allSprites.remove()
     lastGamestate = gamestate
     gamestate = `main`
@@ -1009,17 +1066,20 @@ function closeMainMenu(){
     console.log(`removed all`)
 }
 function openInventory(){
+    //Open inventory menu and set gamestate to inventory
     console.log(`opening inventory`)
     lastGamestate = gamestate
     gamestate = `inventory`
     setup()
 }
 function closeInventory(){
+    console.log(`closing inventory`)
     inventoryMenu.remove()
     gamestate = lastGamestate
 }
 
 async function openSaveFile(index){
+    
     let saveFileData = await readSaveData(index + 1)
     if(saveFileData.fileType != `steelsoulbroken`){
         lastGamestate = gamestate
