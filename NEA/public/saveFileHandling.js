@@ -44,19 +44,19 @@ function receiveWriteData(err){
 async function updateControls(){
     let saveData1 = await readSaveData(1)
     saveData1.controls = controls
-    saveData(saveData1)
+    saveData(`1`)
     let saveData2 = await readSaveData(2)
     saveData2.controls = controls
-    saveData(saveData2)
+    saveData(`2`)
     let saveData3 = await readSaveData(3)
     saveData3.controls = controls
-    saveData(saveData3)
+    saveData(`3`)
     let saveData4 = await readSaveData(4)
     saveData4.controls = controls
-    saveData(saveData4)
+    saveData(`4`)
     let saveDataBlank = await readSaveData(`blank`)
     saveDataBlank.controls = controls
-    saveData(saveDataBlank)
+    saveData(`blank`)
 }
 
 // Save data to specified save file
